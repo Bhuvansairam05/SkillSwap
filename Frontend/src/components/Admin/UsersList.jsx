@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
-import { MoreVertical } from "lucide-react";
+import { Trash2 } from "lucide-react";
+
 
 function UsersList() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const token = localStorage.getItem("token");
+  const handleDeleteUser = (userId) => {
+    console.log("Delete user:", userId);
+    toast("Delete user clicked", { icon: "🗑️" });
+    // 🔜 API delete logic will be added later
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -59,8 +66,9 @@ function UsersList() {
                 Credits
               </th>
               <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Actions
+                Delete
               </th>
+
             </tr>
           </thead>
 
@@ -101,10 +109,15 @@ function UsersList() {
 
                 {/* Actions */}
                 <td className="px-6 py-4 text-right">
-                  <button className="opacity-0 group-hover:opacity-100 transition p-2 rounded-lg hover:bg-gray-200">
-                    <MoreVertical className="w-5 h-5 text-gray-600" />
+                  <button
+                    onClick={() => handleDeleteUser(user._id)}
+                    className="p-2 rounded-lg hover:bg-red-100 transition"
+                    title="Delete User"
+                  >
+                    <Trash2 className="w-5 h-5 text-red-600" />
                   </button>
                 </td>
+
               </tr>
             ))}
 

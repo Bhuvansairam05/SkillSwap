@@ -11,8 +11,10 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+const authRoutes = require("./src/routes/authRoutes");
 const adminRoutes = require("./src/routes/admin");
 app.use("/api/admin", adminRoutes);
+app.use("/api/auth",authRoutes);
 // --------------------
 // MongoDB Connection
 // --------------------

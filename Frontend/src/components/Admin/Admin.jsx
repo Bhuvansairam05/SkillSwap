@@ -24,6 +24,7 @@ function Admin() {
   const [loading, setLoading] = useState(true);
   const [admin, setAdmin] = useState(null);
   const token = localStorage.getItem("token");
+  const [dashboardStats, setDashboardStats] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,6 +46,33 @@ function Admin() {
     toast.error("Unauthorized access");
     navigate("/");
   }, [location, navigate]);
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/admin/dashboardData",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch dashboard data");
+        }
+
+        setDashboardStats(data.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load dashboard stats");
+      }
+    };
+
+    fetchDashboardData();
+  }, [token]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -54,13 +82,7 @@ function Admin() {
 
   if (loading) return <Loader text="Loading Admin Dashboard..." />;
 
-  // 🔧 Mock stats (replace later with backend)
-  const stats = {
-    totalUsers: 10234,
-    totalSessions: 52890,
-    creditPointsIssued: 450000,
-    verifiedTeachers: 892
-  };
+  // 🔧 Mock stats (replace later with backend
 
   const StatCard = ({ icon: Icon, title, value, trend, color }) => (
     <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
@@ -117,8 +139,8 @@ function Admin() {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === item.id
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-50 text-blue-600"
+                : "text-gray-600 hover:bg-gray-50"
                 }`}
             >
               <item.icon className="w-5 h-5" />
@@ -177,17 +199,41 @@ function Admin() {
 
         {/* Dashboard */}
         <div className="p-8">
-          {activeTab === "overview" && (
+          {activeTab === "overview" && dashboardStats && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard icon={Users} title="Total Users" value={stats.totalUsers} trend="+12%" color="bg-blue-600" />
-              <StatCard icon={Video} title="Total Sessions" value={stats.totalSessions} trend="+8%" color="bg-green-600" />
-              <StatCard icon={Award} title="Credits Issued" value={stats.creditPointsIssued} trend="+15%" color="bg-orange-600" />
-              <StatCard icon={UserCheck} title="Verified Teachers" value={stats.verifiedTeachers} trend="+5%" color="bg-purple-600" />
+              <StatCard
+                icon={Users}
+                title="Total Users"
+                value={dashboardStats.users}
+                color="bg-blue-600"
+              />
+
+              <StatCard
+                icon={Video}
+                title="Total Sessions"
+                value={dashboardStats.sessions}
+                color="bg-green-600"
+              />
+
+              <StatCard
+                icon={Award}
+                title="Total Skills"
+                value={dashboardStats.skills}
+                color="bg-orange-600"
+              />
+
+              <StatCard
+                icon={UserCheck}
+                title="Teachers"
+                value={dashboardStats.teachers}
+                color="bg-purple-600"
+              />
             </div>
           )}
 
+
           {activeTab === "users" && (
-            <UsersList token={token}/>
+            <UsersList token={token} />
           )}
 
           {activeTab !== "overview" && activeTab !== "users" && (
