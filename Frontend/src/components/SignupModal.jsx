@@ -76,6 +76,7 @@ export default function SignupModal({ onClose, openLogin }) {
             type="text"
             name="name"
             placeholder="Full name"
+            autoComplete="new-password"
             value={formData.name}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"

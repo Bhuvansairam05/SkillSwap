@@ -1,0 +1,125 @@
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import Loader from "../Loader";
+import { MoreVertical } from "lucide-react";
+
+function UsersList() {
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const token = localStorage.getItem("token");
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/admin/users", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch users");
+        }
+
+        setUsers(data.users); // 👈 backend aligned
+      } catch (error) {
+        console.error(error);
+        toast.error(error.message || "Unable to load users");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [token]);
+
+  if (loading) return <Loader text="Loading Users..." />;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm">
+      <div className="p-6 border-b">
+        <h2 className="text-lg font-bold text-gray-900">Users</h2>
+        <p className="text-sm text-gray-600">All registered users</p>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                User
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Email
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Credits
+              </th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100">
+            {users.map(user => (
+              <tr
+                key={user._id}
+                className="group hover:bg-gray-50 transition"
+              >
+                {/* User */}
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        ID: {user._id.slice(-6)}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Email */}
+                <td className="px-6 py-4 text-gray-600">
+                  {user.email}
+                </td>
+
+                {/* Credits */}
+                <td className="px-6 py-4">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+                    {user.credits} credits
+                  </span>
+                </td>
+
+                {/* Actions */}
+                <td className="px-6 py-4 text-right">
+                  <button className="opacity-0 group-hover:opacity-100 transition p-2 rounded-lg hover:bg-gray-200">
+                    <MoreVertical className="w-5 h-5 text-gray-600" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+
+            {users.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-8 text-gray-500">
+                  No users found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+export default UsersList;

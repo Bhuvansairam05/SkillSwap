@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import toast from "react-hot-toast"
+import  { useState } from "react";
+import toast from "react-hot-toast";
+import {useNavigate} from "react-router-dom";
+import Loader from "../components/Loader";
 export default function LoginModal({ onClose, openSignup }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -25,25 +28,28 @@ export default function LoginModal({ onClose, openSignup }) {
         },
         body: JSON.stringify(formData)
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         toast.error(data.message || "Login failed");
         setLoading(false);
         return;
       }
-
-      // Save token
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       toast.success("Login successful 🎉");
+      console.log("Login success:", data);
       setLoading(false);
       onClose(); // close modal
-
-      // later → redirect to dashboard
+      if(data.user.role == "admin"){
+        navigate("/admin",{state:{user:data.user}});
+      }
+      else if(data.user.isTeacher){
+        navigate("/teacher",{state:{user:data.user}});
+      }
+      else{
+        navigate("/user",{state:{user:data.user}});
+      }
       console.log("Login success:", data);
-
     } catch (err) {
       toast.error("Server error. Please try again.");
       setLoading(false);
@@ -51,7 +57,9 @@ export default function LoginModal({ onClose, openSignup }) {
   };
 
   return (
-    <div
+    <>
+    {loading && <Loader text="Logging in..." />}
+      <div
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
       onClick={onClose}
     >
@@ -77,6 +85,7 @@ export default function LoginModal({ onClose, openSignup }) {
             type="email"
             name="email"
             placeholder="Email address"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
@@ -87,6 +96,7 @@ export default function LoginModal({ onClose, openSignup }) {
             type="password"
             name="password"
             placeholder="Password"
+            autoComplete="current-password"
             value={formData.password}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
@@ -119,5 +129,6 @@ export default function LoginModal({ onClose, openSignup }) {
         </div>
       </div>
     </div>
+    </>
   );
 }

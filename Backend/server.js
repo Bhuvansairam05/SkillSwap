@@ -11,7 +11,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-
+const adminRoutes = require("./src/routes/admin");
+app.use("/api/admin", adminRoutes);
 // --------------------
 // MongoDB Connection
 // --------------------
@@ -32,7 +33,6 @@ app.get("/", (req, res) => {
 });
 
 // Auth routes (we’ll create this next)
-app.use("/api/auth", require("./src/routes/authRoutes"));
 
 // --------------------
 // Server Start

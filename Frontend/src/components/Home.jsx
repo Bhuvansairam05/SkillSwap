@@ -18,7 +18,7 @@ function Home() {
                                     <Zap className="w-6 h-6 text-white" />
                                 </div>
                                 <span className="text-2xl font-bold text-gray-900">
-                                    SkillSwap
+                                    PeerSkill
                                 </span>
                             </div>
 
@@ -113,7 +113,7 @@ function Home() {
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16">
                             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                                Why Choose SkillSwap?
+                                Why Choose PeerSkill?
                             </h2>
                             <p className="text-xl text-gray-600">
                                 Everything you need to learn, teach, and grow
@@ -241,7 +241,7 @@ function Home() {
                             Join thousands of learners and teachers exchanging skills every day.
                         </p>
                         <button className="px-10 py-4 bg-white rounded-lg text-blue-600 font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105">
-                            Join SkillSwap Today
+                            Join PeerSkill Today
                         </button>
                     </div>
                 </section>
@@ -255,7 +255,7 @@ function Home() {
                                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                         <Zap className="w-5 h-5 text-white" />
                                     </div>
-                                    <span className="text-xl font-bold text-white">SkillSwap</span>
+                                    <span className="text-xl font-bold text-white">PeerSkill</span>
                                 </div>
                                 <p className="text-gray-400 text-sm">
                                     Exchange skills, earn credits, and grow together.
@@ -293,7 +293,7 @@ function Home() {
                         </div>
 
                         <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                            <p>&copy; 2026 SkillSwap. All rights reserved.</p>
+                            <p>&copy; 2026 PeerSkill. All rights reserved.</p>
                         </div>
                     </div>
                 </footer>
