@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Loader from "../Loader";
 import { Zap } from "lucide-react";
 import UsersList from "./UsersList";
+import Teachers from "./Teachers";
 import {
   Users,
   Video,
@@ -73,12 +74,44 @@ function Admin() {
 
     fetchDashboardData();
   }, [token]);
+  const confirmLogout = (toastId) => {
+  toast.dismiss(toastId);
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  toast.success("Logged out successfully 👋");
+    setTimeout(() => {
+    navigate("/");
+  }, 1000);
+};
 
   const handleLogout = () => {
-    localStorage.clear();
-    toast.success("Logged out successfully");
-    navigate("/");
-  };
+  toast((t) => (
+    <div className="flex flex-col gap-3">
+      <p className="font-semibold text-gray-900">
+        Are you sure you want to logout?
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm font-medium"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => confirmLogout(t.id)}
+          className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-medium"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  ), {
+    duration: Infinity
+  });
+};
+
 
   if (loading) return <Loader text="Loading Admin Dashboard..." />;
 
@@ -108,7 +141,7 @@ function Admin() {
 
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r transition-all`}>
-        <div className="p-4 border-b flex items-center justify-between">
+        <div className="h-24 px-4 border-b flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
               {/* Thunder Logo */}
@@ -117,7 +150,7 @@ function Admin() {
               </div>
 
               <span className="font-bold text-gray-900">
-                Admin Panel
+                Peer Skill
               </span>
             </div>
           )}
@@ -127,7 +160,7 @@ function Admin() {
           </button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-3 mt-2">
           {[
             { id: "overview", icon: TrendingUp, label: "Overview" },
             { id: "users", icon: Users, label: "Users" },
@@ -149,26 +182,13 @@ function Admin() {
           ))}
         </nav>
 
-        <div className="p-4 border-t space-y-2">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50">
-            <Settings className="w-5 h-5" />
-            {sidebarOpen && <span className="font-medium">Settings</span>}
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span className="font-medium">Logout</span>}
-          </button>
-        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {/* Header */}
-        <header className="bg-white border-b px-8 py-4 flex justify-between items-center">
+        <header className="bg-white border-b h-24 px-8 flex justify-between items-center">
+
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-600 text-sm mt-1">
@@ -176,7 +196,7 @@ function Admin() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button className="relative p-2 hover:bg-gray-100 rounded-lg">
               <Bell className="w-6 h-6 text-gray-600" />
             </button>
@@ -194,6 +214,14 @@ function Admin() {
                 <p className="text-xs text-gray-600">{admin.role}</p>
               </div>
             </div>
+
+            <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
+          >
+            <LogOut className="w-5 h-5" />
+            {sidebarOpen && <span className="font-medium">Logout</span>}
+          </button>
           </div>
         </header>
 
@@ -236,7 +264,10 @@ function Admin() {
             <UsersList token={token} />
           )}
 
-          {activeTab !== "overview" && activeTab !== "users" && (
+          {activeTab === "teachers" &&(
+            <Teachers />
+          )}
+          {activeTab !== "overview" && activeTab !== "users" && activeTab!=="teachers" &&(
             <div className="bg-white rounded-xl shadow-sm p-12 text-center">
               <AlertCircle className="w-10 h-10 text-gray-400 mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-gray-900 mb-2 capitalize">

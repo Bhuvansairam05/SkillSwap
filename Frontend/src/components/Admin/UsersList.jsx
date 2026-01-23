@@ -9,10 +9,65 @@ function UsersList() {
   const [users, setUsers] = useState([]);
   const token = localStorage.getItem("token");
   const handleDeleteUser = (userId) => {
-    console.log("Delete user:", userId);
-    toast("Delete user clicked", { icon: "🗑️" });
-    // 🔜 API delete logic will be added later
-  };
+  toast((t) => (
+    <div className="flex flex-col gap-3">
+      <p className="font-semibold text-gray-900">
+        Are you sure you want to delete this user?
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm font-medium"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => confirmDeleteUser(userId, t.id)}
+          className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-medium"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ), {
+    duration: Infinity
+  });
+};
+const confirmDeleteUser = async (userId, toastId) => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/admin/deleteUser/${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to delete user");
+    }
+
+    // ✅ Update UI
+    setUsers(prev =>
+      prev.filter(user => user._id !== userId)
+    );
+
+    toast.dismiss(toastId);
+    toast.success("User deleted successfully 🗑️");
+
+  } catch (error) {
+    console.error(error);
+    toast.dismiss(toastId);
+    toast.error(error.message || "Error deleting user");
+  }
+};
+
 
   useEffect(() => {
     const fetchUsers = async () => {
