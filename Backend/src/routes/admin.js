@@ -5,7 +5,8 @@ const { getAllUsers, getDashboardData, deleteUser,getTeachers,removeTeacher, get
   completeSession,
   getSkills,
   deleteSkill,
-  addSkill} = require("../controllers/adminController");
+  addSkill,
+  getNotifications} = require("../controllers/adminController");
 const protect = require("../middleware/authMiddleware");
 const isAdmin = require("../middleware/isAdmin");
 const router = express.Router();
@@ -21,4 +22,5 @@ router.patch("/sessions/:id/complete", protect, isAdmin, completeSession);
 router.get("/getSkills",protect,isAdmin,getSkills);
 router.delete("/deleteSkill/:skillId",protect,isAdmin,deleteSkill);
 router.post("/addSkill",protect,isAdmin,addSkill);
+router.get("/getNotifications",protect,isAdmin,getNotifications);
 module.exports = router;

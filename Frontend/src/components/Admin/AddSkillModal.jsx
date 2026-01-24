@@ -46,7 +46,7 @@ function AddSkillModal({ onClose, onSkillAdded }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      toast.success("Skill added successfully ✅");
+      toast.success("Skill added successfully ");
       onSkillAdded(data.skill); // 🔁 update table instantly
       onClose();
     } catch (err) {

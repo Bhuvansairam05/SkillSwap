@@ -59,7 +59,7 @@ const confirmDeleteUser = async (userId, toastId) => {
     );
 
     toast.dismiss(toastId);
-    toast.success("User deleted successfully 🗑️");
+    toast.success("User deleted successfully ");
 
   } catch (error) {
     console.error(error);

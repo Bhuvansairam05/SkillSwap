@@ -87,7 +87,7 @@ function Teachers() {
       setTeachers(prev => prev.filter(t => t._id !== userId));
 
       toast.dismiss(toastId);
-      toast.success("User removed from teachers 👨‍🎓");
+      toast.success("User removed from teachers ");
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message || "Failed to remove teacher");
@@ -140,7 +140,7 @@ function Teachers() {
       setTeachers(prev => prev.filter(t => t._id !== userId));
 
       toast.dismiss(toastId);
-      toast.success("User deleted successfully 🗑️");
+      toast.success("User deleted successfully ");
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message || "Failed to delete user");

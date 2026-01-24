@@ -38,7 +38,7 @@ export default function LoginModal({ onClose, openSignup }) {
       }
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      toast.success("Login successful 🎉");
+      toast.success("Login successful");
       console.log("Login success:", data);
       setLoading(false);
       onClose(); // close modal

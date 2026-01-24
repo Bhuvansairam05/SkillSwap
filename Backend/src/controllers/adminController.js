@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Session = require("../models/Session");
 const Skill = require("../models/Skill");
+const Notification = require("../models/Notification");
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find(
@@ -338,6 +339,27 @@ const addSkill = async (req, res) => {
     });
   }
 };
+const getNotifications = async(req,res)=>{
+   try {
+    // Optional: only fetch relevant admin notifications
+    const notifications = await Notification.find({
+      type: "NEW_TEACHER"
+    })
+      .sort({ createdAt: -1 }) // latest first
+      .limit(20); // safety limit
+
+    return res.status(200).json({
+      success: true,
+      notifications
+    });
+  } catch (error) {
+    console.error("Get Notifications Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch notifications"
+    });
+  }
+}
 module.exports = {
   getAllUsers,
   getDashboardData,
@@ -347,5 +369,5 @@ module.exports = {
   completeSession,
   cancelSession,
   getAllSessions,
-  getSessionById, getSkills, deleteSkill, addSkill
+  getSessionById, getSkills, deleteSkill, addSkill,getNotifications
 };

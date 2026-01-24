@@ -87,7 +87,7 @@ function Skills() {
       setSkills(prev => prev.filter(s => s._id !== skillId));
 
       toast.dismiss(toastId);
-      toast.success("Skill deleted successfully 🗑️");
+      toast.success("Skill deleted successfully ");
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message || "Failed to delete skill");

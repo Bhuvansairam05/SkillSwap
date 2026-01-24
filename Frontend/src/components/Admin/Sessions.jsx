@@ -93,7 +93,7 @@ function Sessions() {
       );
 
       toast.dismiss(toastId);
-      toast.success("Session cancelled successfully ❌");
+      toast.success("Session cancelled successfully ");
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message || "Failed to cancel session");

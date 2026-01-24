@@ -39,7 +39,7 @@ export default function SignupModal({ onClose, openLogin }) {
       onClose();       // close signup
       openLogin();     // open login
 
-      toast.success("Signed up successfully 🎉 Login now");
+      toast.success("Signed up successfully  Login now");
 
     } catch (err) {
       toast.error("Server error. Please try again.");

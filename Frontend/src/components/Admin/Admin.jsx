@@ -7,6 +7,7 @@ import UsersList from "./UsersList";
 import Teachers from "./Teachers";
 import Sessions from "./Sessions";
 import Skills from "./Skills";
+import Notification from "./Notification";
 import {
   Users,
   Video,
@@ -75,43 +76,43 @@ function Admin() {
     };
 
     fetchDashboardData();
-  }, [token]);
+  }, [token, activeTab]);
   const confirmLogout = (toastId) => {
-  toast.dismiss(toastId);
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  toast.success("Logged out successfully 👋");
+    toast.dismiss(toastId);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    toast.success("Logged out successfully ");
     setTimeout(() => {
-    navigate("/");
-  }, 1000);
-};
+      navigate("/");
+    }, 1000);
+  };
   const handleLogout = () => {
-  toast((t) => (
-    <div className="flex flex-col gap-3">
-      <p className="font-semibold text-gray-900">
-        Are you sure you want to logout?
-      </p>
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="font-semibold text-gray-900">
+          Are you sure you want to logout?
+        </p>
 
-      <div className="flex justify-end gap-2">
-        <button
-          onClick={() => toast.dismiss(t.id)}
-          className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm font-medium"
-        >
-          Cancel
-        </button>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm font-medium"
+          >
+            Cancel
+          </button>
 
-        <button
-          onClick={() => confirmLogout(t.id)}
-          className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-medium"
-        >
-          Logout
-        </button>
+          <button
+            onClick={() => confirmLogout(t.id)}
+            className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-medium"
+          >
+            Logout
+          </button>
+        </div>
       </div>
-    </div>
-  ), {
-    duration: Infinity
-  });
-};
+    ), {
+      duration: Infinity
+    });
+  };
   if (loading) return <Loader text="Loading Admin Dashboard..." />;
   const StatCard = ({ icon: Icon, title, value, trend, color }) => (
     <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
@@ -194,7 +195,11 @@ function Admin() {
 
           <div className="flex items-center gap-6">
             <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <Bell className="w-6 h-6 text-gray-600" />
+              <Notification
+                token={token}
+                onOpenTeachers={() => setActiveTab("teachers")}
+              />
+
             </button>
 
             <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
@@ -212,12 +217,12 @@ function Admin() {
             </div>
 
             <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span className="font-medium">Logout</span>}
-          </button>
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="w-5 h-5" />
+              {sidebarOpen && <span className="font-medium">Logout</span>}
+            </button>
           </div>
         </header>
 
@@ -260,14 +265,14 @@ function Admin() {
             <UsersList token={token} />
           )}
 
-          {activeTab === "teachers" &&(
+          {activeTab === "teachers" && (
             <Teachers />
           )}
-          {activeTab === "sessions" &&(
+          {activeTab === "sessions" && (
             <Sessions />
           )}
-          {activeTab === "skills"  &&(
-            <Skills/>
+          {activeTab === "skills" && (
+            <Skills />
           )}
         </div>
 
