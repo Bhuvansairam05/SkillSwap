@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 export default function SignupModal({ onClose, openLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,15 +28,13 @@ export default function SignupModal({ onClose, openLogin }) {
         },
         body: JSON.stringify(formData)
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         toast.error(data.message || "Signup failed");
         setLoading(false);
         return;
       }
-
+      
       setLoading(false);
       onClose();       // close signup
       openLogin();     // open login

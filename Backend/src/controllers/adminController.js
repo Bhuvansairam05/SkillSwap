@@ -34,12 +34,13 @@ const getDashboardData = async(req,res)=>{
   try{
     const sessions = await Session.countDocuments();
     const skills = await Skill.countDocuments();
-    const Users = await User.countDocuments({
+    let Users = await User.countDocuments({
       isTeacher:false
     });
     const Teachers = await User.countDocuments({
       isTeacher:true
     });
+    Users -=1;
     const data = {
       sessions:sessions,
       skills:skills,
@@ -149,11 +150,136 @@ const removeTeacher = async (req, res) => {
     });
   }
 };
+const getAllSessions = async (req, res) => {
+  try {
+    const sessions = await Session.find()
+      .populate("skill", "name")
+      .populate("teacher", "name email")
+      .populate("learner", "name email")
+      .sort({ scheduledAt: -1 });
 
+    res.status(200).json({
+      success: true,
+      sessions
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch sessions"
+    });
+  }
+};
+
+/* ===============================
+   GET SINGLE SESSION
+================================ */
+const getSessionById = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id)
+      .populate("skill", "name")
+      .populate("teacher", "name email")
+      .populate("learner", "name email");
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      session
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch session"
+    });
+  }
+};
+
+/* ===============================
+   CANCEL SESSION (ADMIN)
+================================ */
+const cancelSession = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found"
+      });
+    }
+
+    if (session.status !== "scheduled") {
+      return res.status(400).json({
+        success: false,
+        message: "Only scheduled sessions can be cancelled"
+      });
+    }
+
+    session.status = "cancelled";
+    await session.save();
+
+    // 🔔 Future: refund credits / notify users
+
+    res.status(200).json({
+      success: true,
+      message: "Session cancelled successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to cancel session"
+    });
+  }
+};
+
+/* ===============================
+   COMPLETE SESSION (ADMIN)
+================================ */
+const completeSession = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found"
+      });
+    }
+
+    if (session.status !== "scheduled") {
+      return res.status(400).json({
+        success: false,
+        message: "Only scheduled sessions can be completed"
+      });
+    }
+
+    session.status = "completed";
+    await session.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Session marked as completed"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to complete session"
+    });
+  }
+};
 module.exports = {
   getAllUsers,
   getDashboardData,
   deleteUser,
   getTeachers,
-  removeTeacher
+  removeTeacher,
+  completeSession,
+  cancelSession,
+  getAllSessions,
+  getSessionById
 };

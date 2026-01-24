@@ -80,13 +80,14 @@ function Teachers() {
       );
 
       const data = await res.json();
+      console.log(data);
       if (!res.ok) throw new Error(data.message);
 
       // ✅ remove from teacher table only
       setTeachers(prev => prev.filter(t => t._id !== userId));
 
       toast.dismiss(toastId);
-      toast.success("User moved to learners 👨‍🎓");
+      toast.success("User removed from teachers 👨‍🎓");
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message || "Failed to remove teacher");

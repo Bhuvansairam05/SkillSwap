@@ -5,6 +5,8 @@ import Loader from "../Loader";
 import { Zap } from "lucide-react";
 import UsersList from "./UsersList";
 import Teachers from "./Teachers";
+import Sessions from "./Sessions";
+import Skills from "./Skills";
 import {
   Users,
   Video,
@@ -83,7 +85,6 @@ function Admin() {
     navigate("/");
   }, 1000);
 };
-
   const handleLogout = () => {
   toast((t) => (
     <div className="flex flex-col gap-3">
@@ -111,12 +112,7 @@ function Admin() {
     duration: Infinity
   });
 };
-
-
   if (loading) return <Loader text="Loading Admin Dashboard..." />;
-
-  // 🔧 Mock stats (replace later with backend
-
   const StatCard = ({ icon: Icon, title, value, trend, color }) => (
     <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
       <div className="flex items-center justify-between mb-4">
@@ -166,7 +162,7 @@ function Admin() {
             { id: "users", icon: Users, label: "Users" },
             { id: "teachers", icon: UserCheck, label: "Teachers" },
             { id: "sessions", icon: Video, label: "Sessions" },
-            { id: "credits", icon: Award, label: "Credits" }
+            { id: "skills", icon: Award, label: "Skills" }
           ].map(item => (
             <button
               key={item.id}
@@ -267,16 +263,11 @@ function Admin() {
           {activeTab === "teachers" &&(
             <Teachers />
           )}
-          {activeTab !== "overview" && activeTab !== "users" && activeTab!=="teachers" &&(
-            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-              <AlertCircle className="w-10 h-10 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2 capitalize">
-                {activeTab}
-              </h3>
-              <p className="text-gray-600">
-                This section will be connected to backend soon.
-              </p>
-            </div>
+          {activeTab === "sessions" &&(
+            <Sessions />
+          )}
+          {activeTab === "skills"  &&(
+            <Skills/>
           )}
         </div>
 
