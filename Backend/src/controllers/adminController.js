@@ -1,20 +1,19 @@
 const User = require("../models/User");
 const Session = require("../models/Session");
 const Skill = require("../models/Skill");
-// GET /api/admin/users
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find(
-  {
-    role: { $ne: "admin" },
-    isTeacher: false
-  },
-  {
-    password: 0,
-    skillsLearning: 0,
-    skillsTeaching: 0
-  }
-).sort({ createdAt: -1 });
+      {
+        role: { $ne: "admin" },
+        isTeacher: false
+      },
+      {
+        password: 0,
+        skillsLearning: 0,
+        skillsTeaching: 0
+      }
+    ).sort({ createdAt: -1 });
 
 
     res.status(200).json({
@@ -30,28 +29,28 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
-const getDashboardData = async(req,res)=>{
-  try{
+const getDashboardData = async (req, res) => {
+  try {
     const sessions = await Session.countDocuments();
     const skills = await Skill.countDocuments();
     let Users = await User.countDocuments({
-      isTeacher:false
+      isTeacher: false
     });
     const Teachers = await User.countDocuments({
-      isTeacher:true
+      isTeacher: true
     });
-    Users -=1;
+    Users -= 1;
     const data = {
-      sessions:sessions,
-      skills:skills,
-      users:Users,
-      teachers:Teachers
+      sessions: sessions,
+      skills: skills,
+      users: Users,
+      teachers: Teachers
     }
-    return res.status(200).json({success:true,data});
+    return res.status(200).json({ success: true, data });
 
   }
-  catch(Exception){
-    return res.status(500).json({message:"500 Server not found."});
+  catch (Exception) {
+    return res.status(500).json({ message: "500 Server not found." });
   }
 }
 const deleteUser = async (req, res) => {
@@ -169,10 +168,6 @@ const getAllSessions = async (req, res) => {
     });
   }
 };
-
-/* ===============================
-   GET SINGLE SESSION
-================================ */
 const getSessionById = async (req, res) => {
   try {
     const session = await Session.findById(req.params.id)
@@ -198,10 +193,6 @@ const getSessionById = async (req, res) => {
     });
   }
 };
-
-/* ===============================
-   CANCEL SESSION (ADMIN)
-================================ */
 const cancelSession = async (req, res) => {
   try {
     const session = await Session.findById(req.params.id);
@@ -236,10 +227,6 @@ const cancelSession = async (req, res) => {
     });
   }
 };
-
-/* ===============================
-   COMPLETE SESSION (ADMIN)
-================================ */
 const completeSession = async (req, res) => {
   try {
     const session = await Session.findById(req.params.id);
@@ -272,6 +259,85 @@ const completeSession = async (req, res) => {
     });
   }
 };
+const getSkills = async (req, res) => {
+  try {
+    const skills = await Skill.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      skills
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch skills"
+    });
+  }
+}
+const deleteSkill = async (req, res) => {
+  try {
+    const { skillId } = req.params;
+
+    const skill = await Skill.findById(skillId);
+
+    if (!skill) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found"
+      });
+    }
+
+    await Skill.findByIdAndDelete(skillId);
+
+    res.status(200).json({
+      success: true,
+      message: "Skill deleted successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete skill"
+    });
+  }
+}
+const addSkill = async (req, res) => {
+  try {
+    const { name, category, description } = req.body;
+    if (!name || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Skill name and category are required"
+      });
+    }
+    const existingSkill = await Skill.findOne({
+      name: { $regex: `^${name}$`, $options: "i" }
+    });
+    if (existingSkill) {
+      return res.status(409).json({
+        success: false,
+        message: "Skill already exists"
+      });
+    }
+    const skill = await Skill.create({
+      name: name.trim(),
+      category: category.trim(),
+      description: description?.trim() || ""
+    });
+    res.status(201).json({
+      success: true,
+      message: "Skill added successfully",
+      skill
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to add skill"
+    });
+  }
+};
 module.exports = {
   getAllUsers,
   getDashboardData,
@@ -281,5 +347,5 @@ module.exports = {
   completeSession,
   cancelSession,
   getAllSessions,
-  getSessionById
+  getSessionById, getSkills, deleteSkill, addSkill
 };
