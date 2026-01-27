@@ -7,7 +7,7 @@ import Teacher from './components/Teacher';
 function App() {
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter>
         <Routes>
           <Route path="/" index element = {<Home/>}/>
