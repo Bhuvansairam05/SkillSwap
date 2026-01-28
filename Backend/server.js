@@ -13,8 +13,10 @@ app.use(cors());
 app.use(express.json());
 const authRoutes = require("./src/routes/authRoutes");
 const adminRoutes = require("./src/routes/admin");
+const userRoutes = require("./src/routes/user");
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth",authRoutes);
+app.use("/api/user",userRoutes);
 // --------------------
 // MongoDB Connection
 // --------------------

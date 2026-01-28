@@ -1,7 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import  Home  from './components/Home';
-import User from './components/User';
+import User from './components/User/User';
 import Admin from './components/Admin/Admin';
 import Teacher from './components/Teacher';
 function App() {

@@ -240,7 +240,7 @@ function Home() {
                         <p className="text-xl text-blue-100 mb-8">
                             Join thousands of learners and teachers exchanging skills every day.
                         </p>
-                        <button className="px-10 py-4 bg-white rounded-lg text-blue-600 font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105">
+                        <button onClick={()=>setShowLogin(true)} className="px-10 py-4 bg-white rounded-lg text-blue-600 font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105">
                             Join PeerSkill Today
                         </button>
                     </div>
