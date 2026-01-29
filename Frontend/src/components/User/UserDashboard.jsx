@@ -17,23 +17,20 @@ import {
 import Loader from "../Loader";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import TeacherSessions from "./TeacherSessions";
 
 function UserDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // ✅ Parse user from localStorage ONCE
+  // ✅ user from localStorage
   const storedUser = JSON.parse(localStorage.getItem("user"));
-
   const userId = storedUser?.id;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
-  const [showBecomeTeacherModal, setShowBecomeTeacherModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Initial user state comes from localStorage
+  // ✅ user state
   const [user, setUser] = useState({
     name: storedUser?.name || "",
     email: storedUser?.email || "",
@@ -44,6 +41,29 @@ function UserDashboard() {
     totalHours: 0,
     rating: 0
   });
+
+  /* =======================
+     MOCK TEACHER SESSIONS
+     (backend later)
+  ======================= */
+  const teacherSessions = [
+    {
+      id: 1,
+      learner: "Ravi Kumar",
+      skill: "React",
+      date: "Feb 10, 2026",
+      time: "10:00 AM",
+      status: "pending"
+    },
+    {
+      id: 2,
+      learner: "Anita Sharma",
+      skill: "Node.js",
+      date: "Feb 12, 2026",
+      time: "2:00 PM",
+      status: "approved"
+    }
+  ];
 
   /* =======================
      FETCH DASHBOARD DATA
@@ -83,24 +103,18 @@ function UserDashboard() {
       }
     };
 
-    if (userId && token) {
-      fetchDashboardData();
-    }
+    if (userId && token) fetchDashboardData();
   }, [userId, token]);
 
   /* =======================
-     LOGOUT WITH CONFIRM
+     LOGOUT
   ======================= */
   const confirmLogout = (toastId) => {
     toast.dismiss(toastId);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     toast.success("Logged out successfully");
-
-    setTimeout(() => {
-      navigate("/");
-    }, 1000);
+    setTimeout(() => navigate("/"), 1000);
   };
 
   const handleLogout = () => {
@@ -110,18 +124,16 @@ function UserDashboard() {
           <p className="font-semibold text-gray-900">
             Are you sure you want to logout?
           </p>
-
           <div className="flex justify-end gap-2">
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm font-medium"
+              className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm"
             >
               Cancel
             </button>
-
             <button
               onClick={() => confirmLogout(t.id)}
-              className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-medium"
+              className="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm"
             >
               Logout
             </button>
@@ -135,9 +147,7 @@ function UserDashboard() {
   const StatCard = ({ icon: Icon, title, value, color }) => (
     <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
       <div className="flex items-center gap-3 sm:gap-4">
-        <div
-          className={`w-12 h-12 sm:w-14 sm:h-14 ${color} rounded-lg flex items-center justify-center`}
-        >
+        <div className={`w-12 h-12 sm:w-14 sm:h-14 ${color} rounded-lg flex items-center justify-center`}>
           <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
         </div>
         <div>
@@ -155,11 +165,7 @@ function UserDashboard() {
       <Toaster position="top-right" />
 
       {/* Sidebar */}
-      <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-white border-r transition-all hidden md:flex md:flex-col`}
-      >
+      <aside className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r transition-all hidden md:flex md:flex-col`}>
         <div className="h-16 sm:h-20 lg:h-24 px-4 border-b flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -169,7 +175,6 @@ function UserDashboard() {
               <span className="font-bold text-gray-900">Peer Skill</span>
             </div>
           )}
-
           <button onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X /> : <Menu />}
           </button>
@@ -185,9 +190,7 @@ function UserDashboard() {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                activeTab === item.id
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50"
+                activeTab === item.id ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -199,17 +202,14 @@ function UserDashboard() {
 
       {/* Main */}
       <main className="flex-1 overflow-auto">
-        <header className="bg-white border-b h-auto md:h-20 lg:h-24 px-6 flex justify-between items-center">
+        <header className="bg-white border-b h-24 px-6 flex justify-between items-center">
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
-              Welcome back, {user.name}
-            </h1>
+            <h1 className="text-xl lg:text-2xl font-bold">Welcome back, {user.name}</h1>
             <p className="text-sm text-gray-600">Learner Dashboard</p>
           </div>
 
           <div className="flex items-center gap-6">
             <Bell className="w-6 h-6 text-gray-600" />
-
             <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-semibold">
@@ -221,13 +221,8 @@ function UserDashboard() {
                 <p className="text-xs text-gray-600">{user.role}</p>
               </div>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
+            <button onClick={handleLogout} className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg">
+              <LogOut className="w-5 h-5" /> Logout
             </button>
           </div>
         </header>
@@ -235,12 +230,64 @@ function UserDashboard() {
         <div className="p-6">
           {activeTab === "overview" && (
             <>
+              {/* Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard icon={Award} title="Credits" value={user.credits} color="bg-blue-600" />
                 <StatCard icon={CheckCircle} title="Completed Sessions" value={user.completedSessions} color="bg-green-600" />
                 <StatCard icon={Clock} title="Total Hours" value={user.totalHours} color="bg-orange-600" />
                 <StatCard icon={Star} title="Rating" value={user.rating} color="bg-purple-600" />
               </div>
+
+              {/* CONDITIONAL BLOCK */}
+              {!user.isTeacher ? (
+                <div className="bg-blue-600 text-white rounded-xl p-6">
+                  <h3 className="text-lg font-bold mb-2">Become a Teacher</h3>
+                  <p className="text-sm mb-4">
+                    Share your knowledge, conduct live sessions, and earn credits.
+                  </p>
+                  <button
+                    onClick={() => toast.success("Teacher application submitted (mock)")}
+                    className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold text-sm"
+                  >
+                    Apply Now
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <h3 className="text-lg font-bold mb-4">Your Teaching Sessions</h3>
+
+                  <div className="space-y-4">
+                    {teacherSessions.map(session => (
+                      <div key={session.id} className="border rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold">{session.skill}</p>
+                          <p className="text-sm text-gray-600">
+                            {session.learner} • {session.date} • {session.time}
+                          </p>
+                          <p className="text-xs text-gray-500">Status: {session.status}</p>
+                        </div>
+
+                        {session.status !== "completed" && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toast.success("Session approved (mock)")}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => toast.error("Session rejected (mock)")}
+                              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
 
@@ -255,19 +302,5 @@ function UserDashboard() {
     </div>
   );
 }
-const BecomeTeacherCard = ({ onApply }) => (
-  <div className="bg-blue-600 text-white rounded-xl p-6">
-    <h3 className="text-lg font-bold mb-2">Become a Teacher</h3>
-    <p className="text-sm mb-4">
-      Share your knowledge, conduct live sessions, and earn credits.
-    </p>
-    <button
-      onClick={onApply}
-      className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold text-sm"
-    >
-      Apply Now
-    </button>
-  </div>
-);
 
 export default UserDashboard;

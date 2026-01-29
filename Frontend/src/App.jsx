@@ -1,7 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import  Home  from './components/Home';
-import User from './components/User/User';
+import UserDashboard from './components/User/UserDashboard';
 import Admin from './components/Admin/Admin';
 import Teacher from './components/Teacher';
 function App() {
@@ -12,8 +12,7 @@ function App() {
         <Routes>
           <Route path="/" index element = {<Home/>}/>
           <Route path="/admin" element={<Admin/>}/>
-          <Route path="/user" element = {<User/>}/>
-          <Route path="/teacher" element ={<Teacher/>}/>
+          <Route path="/user" element = {<UserDashboard/>}/>
         </Routes>
       </BrowserRouter>
     </>

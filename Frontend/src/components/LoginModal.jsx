@@ -45,9 +45,9 @@ export default function LoginModal({ onClose, openSignup }) {
       if (data.user.role == "admin") {
         navigate("/admin", { state: { user: data.user } });
       }
-      else if (data.user.isTeacher) {
-        navigate("/teacher", { state: { user: data.user } });
-      }
+      // else if (data.user.isTeacher) {
+      //   navigate("/teacher", { state: { user: data.user } });
+      // }
       else {
         navigate("/user", { state: { user: data.user } });
       }
