@@ -3,7 +3,6 @@ import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import  Home  from './components/Home';
 import UserDashboard from './components/User/UserDashboard';
 import Admin from './components/Admin/Admin';
-import Teacher from './components/Teacher';
 function App() {
   return (
     <>

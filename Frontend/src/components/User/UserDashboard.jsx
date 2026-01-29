@@ -17,6 +17,8 @@ import {
 import Loader from "../Loader";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import TeacherApplicationModal from "./TeacherApplicationModal";
+
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ function UserDashboard() {
   // ✅ user from localStorage
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -189,9 +192,8 @@ function UserDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                activeTab === item.id ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === item.id ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+                }`}
             >
               <item.icon className="w-5 h-5" />
               {sidebarOpen && <span>{item.label}</span>}
@@ -246,11 +248,12 @@ function UserDashboard() {
                     Share your knowledge, conduct live sessions, and earn credits.
                   </p>
                   <button
-                    onClick={() => toast.success("Teacher application submitted (mock)")}
+                    onClick={() => setShowTeacherModal(true)}
                     className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold text-sm"
                   >
                     Apply Now
                   </button>
+
                 </div>
               ) : (
                 <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -299,6 +302,13 @@ function UserDashboard() {
           )}
         </div>
       </main>
+      {showTeacherModal && (
+        <TeacherApplicationModal
+          user={storedUser}
+          onClose={() => setShowTeacherModal(false)}
+        />
+      )}
+
     </div>
   );
 }
