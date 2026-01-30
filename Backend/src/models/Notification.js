@@ -24,6 +24,9 @@ const Notification = new mongoose.Schema({
   isRead: {
     type: Boolean,
     default: false
+  },
+  skills:{
+    type:Array
   }
 
 }, { timestamps: true });
