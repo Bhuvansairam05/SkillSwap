@@ -6,7 +6,12 @@ const { getAllUsers, getDashboardData, deleteUser,getTeachers,removeTeacher, get
   getSkills,
   deleteSkill,
   addSkill,
-  getNotifications} = require("../controllers/adminController");
+  getNotifications,
+  addNotification,
+  sendZoomLink,
+  approveTeacher,
+  rejectTeacher,
+} = require("../controllers/adminController");
 const protect = require("../middleware/authMiddleware");
 const isAdmin = require("../middleware/isAdmin");
 const router = express.Router();
@@ -23,4 +28,8 @@ router.get("/getSkills",protect,isAdmin,getSkills);
 router.delete("/deleteSkill/:skillId",protect,isAdmin,deleteSkill);
 router.post("/addSkill",protect,isAdmin,addSkill);
 router.get("/getNotifications",protect,isAdmin,getNotifications);
+router.post("/addNotification",addNotification);
+router.patch("/notifications/:id/zoom", sendZoomLink);
+router.patch("/notifications/:id/approve", approveTeacher);
+router.patch("/notifications/:id/reject", rejectTeacher);
 module.exports = router;

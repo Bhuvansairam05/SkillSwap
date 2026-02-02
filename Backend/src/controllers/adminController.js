@@ -339,8 +339,8 @@ const addSkill = async (req, res) => {
     });
   }
 };
-const getNotifications = async(req,res)=>{
-   try {
+const getNotifications = async (req, res) => {
+  try {
     // Optional: only fetch relevant admin notifications
     const notifications = await Notification.find({
       type: "NEW_TEACHER"
@@ -360,14 +360,106 @@ const getNotifications = async(req,res)=>{
     });
   }
 }
+const addNotification = async (req, res) => {
+  try {
+    const { type, message, skills, userId } = req.body;
+
+    if (!type || !message || !skills || !userId) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const newNotification = await Notification.create({
+      type,
+      message,
+      skills,
+      refId: userId, // who applied
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Notification sent to admin",
+      data: newNotification,
+    });
+  } catch (error) {
+    console.error("Add Notification Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+const approveTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notif = await Notification.findById(id);
+    const user = await User.findById(notif.refId);
+
+    user.isTeacher = true;
+    await user.save();
+
+    notif.approve = true;
+    notif.reject = false;
+    await notif.save();
+
+    res.json({ message: "Teacher Approved" });
+  } catch (err) {
+    res.status(500).json({ message: "Error approving teacher" });
+  }
+};
+const rejectTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notif = await Notification.findById(id);
+
+    notif.reject = true;
+    notif.approve = false;
+    await notif.save();
+
+    res.json({ message: "Teacher Rejected" });
+  } catch (err) {
+    res.status(500).json({ message: "Error rejecting teacher" });
+  }
+};
+const sendMail = require("../utils/sendMail"); // your mail utility
+
+const sendZoomLink = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { zoomlink } = req.body;
+
+    const notif = await Notification.findById(id);
+    if (!notif) return res.status(404).json({ message: "Notification not found" });
+
+    notif.zoomlink = zoomlink;
+    await notif.save();
+
+    // get user
+    const user = await User.findById(notif.refId);
+
+    await sendMail(
+      user.email,
+      "Interview Scheduled - Peer Skill",
+      `Hi ${user.name},\n\nYour teacher interview is scheduled.\nZoom Link: ${zoomlink}`
+    );
+
+    res.json({ message: "Zoom link sent to user email" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error sending zoom link" });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getDashboardData,
   deleteUser,
   getTeachers,
+  addNotification,
   removeTeacher,
   completeSession,
   cancelSession,
   getAllSessions,
-  getSessionById, getSkills, deleteSkill, addSkill,getNotifications
+  approveTeacher,
+  rejectTeacher,
+  sendZoomLink,
+  getSessionById, getSkills, deleteSkill, addSkill, getNotifications
 };

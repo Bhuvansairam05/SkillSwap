@@ -6,38 +6,55 @@ function TeacherApplicationModal({ onClose, user }) {
   const [skills, setSkills] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!skills.trim()) {
-      toast.error("Please enter at least one skill");
-      return;
+  if (!skills.trim()) {
+    toast.error("Please enter at least one skill");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const payload = {
+      type: "NEW_TEACHER",
+      message: `${user.name} applied to become a teacher`,
+      skills: skills.split(",").map(s => s.trim()),
+      userId: user.id
+    };
+
+    const res = await fetch(
+      "http://localhost:5000/api/admin/addNotification",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message);
     }
 
-    try {
-      setLoading(true);
+    toast.success("Application sent to admin");
 
-      // 🔴 BACKEND WILL COME LATER
-      // This is the payload that will be sent to admin
-      const payload = {
-        type: "NEW_TEACHER",
-        message: `${user.name} applied to become a teacher`,
-        skills: skills.split(",").map(s => s.trim()),
-        userId: user.id
-      };
+    // ✅ store flag in localStorage
+    localStorage.setItem("teacherApplied", "true");
 
-      console.log("Teacher Application Payload →", payload);
+    onClose();
+    window.location.reload(); // refresh dashboard state
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // 🔔 MOCK SUCCESS
-      toast.success("Application sent to admin for approval");
-
-      onClose();
-    } catch (error) {
-      toast.error("Failed to submit application");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">

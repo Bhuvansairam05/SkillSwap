@@ -27,6 +27,17 @@ const Notification = new mongoose.Schema({
   },
   skills:{
     type:Array
+  },
+  zoomlink:{
+    type:String
+  },
+  approve:{
+    type:Boolean,
+    default:false
+  },
+  reject:{
+    type:Boolean,
+    default:false
   }
 
 }, { timestamps: true });

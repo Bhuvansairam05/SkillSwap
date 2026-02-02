@@ -247,13 +247,23 @@ function UserDashboard() {
                   <p className="text-sm mb-4">
                     Share your knowledge, conduct live sessions, and earn credits.
                   </p>
-                  <button
-                    onClick={() => setShowTeacherModal(true)}
-                    className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold text-sm"
-                  >
-                    Apply Now
-                  </button>
 
+                  {/* 👇 APPLY / APPLIED BUTTON LOGIC */}
+                  {localStorage.getItem("teacherApplied") === "true" ? (
+                    <button
+                      disabled
+                      className="bg-black text-white px-5 py-2 rounded-lg font-semibold text-sm cursor-not-allowed"
+                    >
+                      Applied
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowTeacherModal(true)}
+                      className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold text-sm"
+                    >
+                      Apply Now
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -261,13 +271,18 @@ function UserDashboard() {
 
                   <div className="space-y-4">
                     {teacherSessions.map(session => (
-                      <div key={session.id} className="border rounded-lg p-4 flex justify-between items-center">
+                      <div
+                        key={session.id}
+                        className="border rounded-lg p-4 flex justify-between items-center"
+                      >
                         <div>
                           <p className="font-semibold">{session.skill}</p>
                           <p className="text-sm text-gray-600">
                             {session.learner} • {session.date} • {session.time}
                           </p>
-                          <p className="text-xs text-gray-500">Status: {session.status}</p>
+                          <p className="text-xs text-gray-500">
+                            Status: {session.status}
+                          </p>
                         </div>
 
                         {session.status !== "completed" && (
@@ -293,6 +308,7 @@ function UserDashboard() {
               )}
             </>
           )}
+
 
           {activeTab !== "overview" && (
             <div className="bg-white rounded-xl p-12 text-center">
