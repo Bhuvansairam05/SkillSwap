@@ -71,6 +71,31 @@ function UserDashboard() {
   /* =======================
      FETCH DASHBOARD DATA
   ======================= */
+
+  useEffect(() => {
+  const fetchUser = async () => {
+    const res = await fetch(`http://localhost:5000/api/user/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    setUser(prev => ({
+      ...prev,
+      ...data.user
+    }));
+
+    // also update localStorage so next refresh is correct
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    if (data.user.isTeacher) {
+      localStorage.removeItem("teacherApplied");
+    }
+  };
+
+  fetchUser();
+}, []);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -116,6 +141,7 @@ function UserDashboard() {
     toast.dismiss(toastId);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.clear();
     toast.success("Logged out successfully");
     setTimeout(() => navigate("/"), 1000);
   };

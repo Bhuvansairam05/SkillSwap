@@ -51,5 +51,10 @@ const dashboardData = async (req, res) => {
     });
   }
 };
+const getMe = async (req, res) => {
+  const user = await User.findById(req.params.userId).select("-password");
+  res.json({ user });
+};
 
-module.exports = { dashboardData };
+
+module.exports = { dashboardData,getMe };

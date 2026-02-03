@@ -81,6 +81,7 @@ function Admin() {
     toast.dismiss(toastId);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.clear();
     toast.success("Logged out successfully ");
     setTimeout(() => {
       navigate("/");
@@ -194,13 +195,11 @@ function Admin() {
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <Notification
-                token={token}
-                onOpenTeachers={() => setActiveTab("teachers")}
-              />
+            <Notification
+              token={token}
+              onOpenTeachers={() => setActiveTab("teachers")}
+            />
 
-            </button>
 
             <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">

@@ -6,9 +6,9 @@ const Notification = new mongoose.Schema({
       "NEW_TEACHER",
       "SESSION_CANCELLED",
       "SESSION_FAILED",
-      "SKILL_ADDED","TEACHER_APPROVED",
-  "TEACHER_REJECTED",
-  "TEACHER_REMOVED"
+      "SKILL_ADDED", "TEACHER_APPROVED",
+      "TEACHER_REJECTED",
+      "TEACHER_REMOVED"
     ],
     required: true
   },
@@ -27,26 +27,30 @@ const Notification = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  skills:{
-    type:Array
+  skills: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skill"
+    }
+  ]
+  ,
+  zoomlink: {
+    type: String
   },
-  zoomlink:{
-    type:String
+  approve: {
+    type: Boolean,
+    default: false
   },
-  approve:{
-    type:Boolean,
-    default:false
-  },
-  reject:{
-    type:Boolean,
-    default:false
+  reject: {
+    type: Boolean,
+    default: false
   },
   actionStage: {
-  type: String,
-  enum: ["PENDING", "INTERVIEW_SENT", "COMPLETED"],
-  default: "PENDING"
-}
+    type: String,
+    enum: ["PENDING", "INTERVIEW_SENT", "COMPLETED"],
+    default: "PENDING"
+  }
 
 
 }, { timestamps: true });
-module.exports = mongoose.model("Notification",Notification);
+module.exports = mongoose.model("Notification", Notification);

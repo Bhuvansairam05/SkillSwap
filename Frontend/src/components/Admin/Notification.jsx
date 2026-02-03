@@ -115,7 +115,8 @@ function Notification({ token, onOpenTeachers }) {
                                             type="text"
                                             placeholder="Paste Zoom link"
                                             className="border px-2 py-1 rounded w-full text-xs"
-                                            onBlur={async (e) => {
+                                            onKeyDown={async (e) => {
+                                                if(e.key=="Enter"){
                                                 const link = e.target.value;
                                                 if (!link) return;
 
@@ -132,7 +133,7 @@ function Notification({ token, onOpenTeachers }) {
                                                 );
 
                                                 toast.success("Zoom link sent to user");
-                                            }}
+                                            }}}
                                         />
                                     </div>
                                 )}
