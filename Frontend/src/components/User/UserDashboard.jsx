@@ -186,7 +186,7 @@ function UserDashboard() {
         <nav className="p-4 space-y-3 mt-2">
           {[
             { id: "overview", icon: TrendingUp, label: "Dashboard" },
-            { id: "courses", icon: BookOpen, label: "My Courses" },
+            { id: "Skills", icon: BookOpen, label: "My Skills" },
             { id: "sessions", icon: Video, label: "Sessions" }
           ].map(item => (
             <button

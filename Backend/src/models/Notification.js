@@ -6,7 +6,9 @@ const Notification = new mongoose.Schema({
       "NEW_TEACHER",
       "SESSION_CANCELLED",
       "SESSION_FAILED",
-      "SKILL_ADDED"
+      "SKILL_ADDED","TEACHER_APPROVED",
+  "TEACHER_REJECTED",
+  "TEACHER_REMOVED"
     ],
     required: true
   },
@@ -38,7 +40,13 @@ const Notification = new mongoose.Schema({
   reject:{
     type:Boolean,
     default:false
-  }
+  },
+  actionStage: {
+  type: String,
+  enum: ["PENDING", "INTERVIEW_SENT", "COMPLETED"],
+  default: "PENDING"
+}
+
 
 }, { timestamps: true });
 module.exports = mongoose.model("Notification",Notification);

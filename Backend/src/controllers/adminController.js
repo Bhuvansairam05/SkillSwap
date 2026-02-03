@@ -134,12 +134,35 @@ const removeTeacher = async (req, res) => {
       });
     }
 
-    user.isTeacher = false;
-    await user.save();
+    // 1️⃣ Cancel all upcoming sessions
+    await Session.updateMany(
+      {
+        teacher: userId,
+        status: "scheduled",
+        scheduledAt: { $gt: new Date() }
+      },
+      {
+        status: "cancelled"
+      }
+    );
 
+    // 2️⃣ Remove teacher abilities
+    user.isTeacher = false;
+    user.skillsTeaching = [];
+
+    // 3️⃣ Reset teacher-specific stats
+    user.rating = 0;
+    user.totalSessionsGiven = 0;
+
+    await user.save();
+    await Notification.create({
+      type: "TEACHER_REMOVED",
+      message: "You have been removed from the teacher role by admin.",
+      refId: user._id
+    });
     return res.status(200).json({
       success: true,
-      message: "User removed from teacher role successfully"
+      message: "User removed from teacher role successfully and sessions cancelled"
     });
 
   } catch (error) {
@@ -390,35 +413,72 @@ const approveTeacher = async (req, res) => {
     const { id } = req.params;
 
     const notif = await Notification.findById(id);
+    if (!notif) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
     const user = await User.findById(notif.refId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     user.isTeacher = true;
+
+    const newSkills = notif.skills || [];
+
+    newSkills.forEach((skillId) => {
+      const exists = user.skillsTeaching.some(
+        (s) => s.skill.toString() === skillId.toString()
+      );
+
+      if (!exists) {
+        user.skillsTeaching.push({ skill: skillId, approved: true });
+      }
+    });
+
     await user.save();
 
-    notif.approve = true;
-    notif.reject = false;
-    await notif.save();
+    // 🔔 Notify user
+    await Notification.create({
+      type: "TEACHER_APPROVED",
+      message: "Congratulations! You are now approved as a teacher.",
+      refId: user._id
+    });
 
-    res.json({ message: "Teacher Approved" });
+    // ❌ Remove admin notification
+    await Notification.findByIdAndDelete(id);
+
+    res.json({ message: "Teacher Approved and user notified" });
+
   } catch (err) {
     res.status(500).json({ message: "Error approving teacher" });
   }
 };
+
 const rejectTeacher = async (req, res) => {
   try {
     const { id } = req.params;
 
     const notif = await Notification.findById(id);
+    const user = await User.findById(notif.refId);
 
-    notif.reject = true;
-    notif.approve = false;
-    await notif.save();
+    // 🔔 Notify user
+    await Notification.create({
+      type: "TEACHER_REJECTED",
+      message: "Sorry, your teacher request was rejected after the interview.",
+      refId: user._id
+    });
 
-    res.json({ message: "Teacher Rejected" });
+    // ❌ Remove admin notification
+    await Notification.findByIdAndDelete(id);
+
+    res.json({ message: "Teacher Rejected and user notified" });
+
   } catch (err) {
     res.status(500).json({ message: "Error rejecting teacher" });
   }
 };
+
 const sendMail = require("../utils/sendMail"); // your mail utility
 
 const sendZoomLink = async (req, res) => {
@@ -430,6 +490,7 @@ const sendZoomLink = async (req, res) => {
     if (!notif) return res.status(404).json({ message: "Notification not found" });
 
     notif.zoomlink = zoomlink;
+    notif.actionStage = "INTERVIEW_SENT";
     await notif.save();
 
     // get user
