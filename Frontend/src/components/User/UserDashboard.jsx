@@ -18,6 +18,7 @@ import Loader from "../Loader";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import TeacherApplicationModal from "./TeacherApplicationModal";
+import AddSessionModal from "./AddSessionModal";
 
 
 function UserDashboard() {
@@ -28,10 +29,20 @@ function UserDashboard() {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
   const [showTeacherModal, setShowTeacherModal] = useState(false);
-
+  const [newSkill, setNewSkill] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
+  const BASE = "http://localhost:5000/api/user";
+
+  const [allSkills, setAllSkills] = useState([]);
+  const [selectedSkill, setSelectedSkill] = useState("");
+  const [sessions, setSessions] = useState([]);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [teacherSessions, setTeacherSessions] = useState([]);
+  const [zoomLinks, setZoomLinks] = useState({});
+
+
 
   // ✅ user state
   const [user, setUser] = useState({
@@ -44,57 +55,206 @@ function UserDashboard() {
     totalHours: 0,
     rating: 0
   });
+  useEffect(() => {
+  if (user.isTeacher) {
+    fetch(`http://localhost:5000/api/user/teacher/sessions/${userId}`)
+      .then(res => res.json())
+      .then(data => setTeacherSessions(data.sessions));
+  }
+}, [activeTab, user.isTeacher]);
+
+  useEffect(() => {
+    const fetchAllSkills = async () => {
+      const res = await fetch(`${BASE}/all-skills`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setAllSkills(data.skills);
+    };
+
+    fetchAllSkills();
+  }, []);
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      const res = await fetch(`${BASE}/skills/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      setSkillsLearning(data.user.skillsLearning || []);
+      setSkillsTeaching(data.user.skillsTeaching || []);
+    };
+
+    if (userId) fetchUserSkills();
+  }, [userId]);
+  const handleAddLearningSkill = async () => {
+    if (!selectedSkill) return;
+
+    const res = await fetch(`${BASE}/skills/learning/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ skillId: selectedSkill })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success(data.message);
+      setSelectedSkill("");
+      // refresh skills
+      const updated = await fetch(`${BASE}/skills/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const udata = await updated.json();
+      setSkillsLearning(udata.user.skillsLearning);
+    } else {
+      toast.error(data.message);
+    }
+  };
+  useEffect(() => {
+    if (activeTab === "sessions") {
+      fetch(`http://localhost:5000/api/user/sessions/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => setSessions(data.sessions));
+    }
+  }, [activeTab]);
+  const handleApproveSession = async (id, link) => {
+    await fetch(
+      `http://localhost:5000/api/user/teacher/sessions/approve/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meetingLink: link })
+      }
+    );
+
+    toast.success("Session approved");
+    setTeacherSessions(prev =>
+      prev.map(s =>
+        s._id === id ? { ...s, meetingLink: link } : s
+      )
+    );
+  };
+
+  const handleComplete = async (id) => {
+    await fetch(`http://localhost:5000/api/user/sessions/complete/${id}`, {
+      method: "PUT"
+    });
+    toast.success("Session completed");
+    setSessions(prev =>
+      prev.map(s => (s._id === id ? { ...s, status: "completed" } : s))
+    );
+  };
+
+  const handleCancel = async (id) => {
+    await fetch(`http://localhost:5000/api/user/sessions/cancel/${id}`, {
+      method: "PUT"
+    });
+    toast.error("Session cancelled");
+    setSessions(prev =>
+      prev.map(s => (s._id === id ? { ...s, status: "cancelled" } : s))
+    );
+  };
+
+  useEffect(() => {
+    if (user.skillsLearning) setSkillsLearning(user.skillsLearning);
+    if (user.skillsTeaching) setSkillsTeaching(user.skillsTeaching);
+  }, [user]);
+
+
+
+  const handleAddTeachingSkill = async () => {
+    if (!selectedSkill) return;
+
+    const res = await fetch(`${BASE}/skills/teaching/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ skillId: selectedSkill })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success(data.message);
+      setSelectedSkill("");
+      const updated = await fetch(`${BASE}/skills/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const udata = await updated.json();
+      setSkillsTeaching(udata.user.skillsTeaching);
+    } else {
+      toast.error(data.message);
+    }
+  };
+
+  const handleDeleteLearning = async (skillId) => {
+    await fetch(`${BASE}/skills/learning/${userId}/${skillId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setSkillsLearning(prev =>
+      prev.filter(item => item.skill._id !== skillId)
+    );
+  };
+
+  const handleDeleteTeaching = async (skillId) => {
+    await fetch(`${BASE}/skills/teaching/${userId}/${skillId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setSkillsTeaching(prev =>
+      prev.filter(item => item.skill._id !== skillId)
+    );
+  };
+
 
   /* =======================
      MOCK TEACHER SESSIONS
      (backend later)
   ======================= */
-  const teacherSessions = [
-    {
-      id: 1,
-      learner: "Ravi Kumar",
-      skill: "React",
-      date: "Feb 10, 2026",
-      time: "10:00 AM",
-      status: "pending"
-    },
-    {
-      id: 2,
-      learner: "Anita Sharma",
-      skill: "Node.js",
-      date: "Feb 12, 2026",
-      time: "2:00 PM",
-      status: "approved"
-    }
-  ];
+
+  const [skillsLearning, setSkillsLearning] = useState(user.skillsLearning || []);
+  const [skillsTeaching, setSkillsTeaching] = useState(user.skillsTeaching || []);
+
+
 
   /* =======================
      FETCH DASHBOARD DATA
   ======================= */
 
   useEffect(() => {
-  const fetchUser = async () => {
-    const res = await fetch(`http://localhost:5000/api/user/me`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const fetchUser = async () => {
+      const res = await fetch(`http://localhost:5000/api/user/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setUser(prev => ({
-      ...prev,
-      ...data.user
-    }));
+      setUser(prev => ({
+        ...prev,
+        ...data.user
+      }));
 
-    // also update localStorage so next refresh is correct
-    localStorage.setItem("user", JSON.stringify(data.user));
+      // also update localStorage so next refresh is correct
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    if (data.user.isTeacher) {
-      localStorage.removeItem("teacherApplied");
-    }
-  };
+      if (data.user.isTeacher) {
+        localStorage.removeItem("teacherApplied");
+      }
+    };
 
-  fetchUser();
-}, []);
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -274,7 +434,6 @@ function UserDashboard() {
                     Share your knowledge, conduct live sessions, and earn credits.
                   </p>
 
-                  {/* 👇 APPLY / APPLIED BUTTON LOGIC */}
                   {localStorage.getItem("teacherApplied") === "true" ? (
                     <button
                       disabled
@@ -296,54 +455,234 @@ function UserDashboard() {
                   <h3 className="text-lg font-bold mb-4">Your Teaching Sessions</h3>
 
                   <div className="space-y-4">
-                    {teacherSessions.map(session => (
+                    {teacherSessions.length === 0 && (
+                      <p className="text-gray-500">No sessions booked yet.</p>
+                    )}
+
+                    {teacherSessions.map((session) => (
                       <div
-                        key={session.id}
-                        className="border rounded-lg p-4 flex justify-between items-center"
+                        key={session._id}
+                        className="border rounded-lg p-4 flex flex-col gap-3"
                       >
                         <div>
-                          <p className="font-semibold">{session.skill}</p>
-                          <p className="text-sm text-gray-600">
-                            {session.learner} • {session.date} • {session.time}
+                          <p className="font-semibold text-lg">
+                            {session.skill.name}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            Status: {session.status}
+                          <p className="text-sm text-gray-600">
+                            Learner: {session.learner.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(session.scheduledAt).toLocaleString()} •{" "}
+                            {session.duration} mins
                           </p>
                         </div>
 
-                        {session.status !== "completed" && (
+                        {/* If link not added yet */}
+                        {!session.meetingLink ? (
                           <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Paste Zoom link here"
+                              className="border px-3 py-2 rounded-md flex-1"
+                              value={zoomLinks[session._id] || ""}
+                              onChange={(e) =>
+                                setZoomLinks({
+                                  ...zoomLinks,
+                                  [session._id]: e.target.value
+                                })
+                              }
+                            />
                             <button
-                              onClick={() => toast.success("Session approved (mock)")}
+                              onClick={() => handleApproveSession(session._id,zoomLinks[session._id])}
                               className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
                             >
                               Approve
                             </button>
-                            <button
-                              onClick={() => toast.error("Session rejected (mock)")}
-                              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
-                            >
-                              Reject
-                            </button>
                           </div>
+                        ) : (
+                          <a
+                            href={session.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline text-sm"
+                          >
+                            Join Meeting
+                          </a>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+
             </>
           )}
 
+          {activeTab === "Skills" && (
+            <div className="space-y-8">
+              {/* Add Skill Input */}
+              <div className="bg-white p-6 rounded-xl shadow-sm flex gap-4">
+                <select
+                  value={selectedSkill}
+                  onChange={(e) => setSelectedSkill(e.target.value)}
+                  className="flex-1 border px-4 py-2 rounded-lg"
+                >
+                  <option value="">Select a skill</option>
+                  {allSkills.map(skill => (
+                    <option key={skill._id} value={skill._id}>
+                      {skill.name} ({skill.category})
+                    </option>
+                  ))}
+                </select>
 
-          {activeTab !== "overview" && (
-            <div className="bg-white rounded-xl p-12 text-center">
-              <AlertCircle className="mx-auto mb-4 text-gray-400" size={40} />
-              <h3 className="text-xl font-bold">Coming Soon</h3>
+                <button
+                  onClick={handleAddLearningSkill}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Add Learning
+                </button>
+                <button
+                  onClick={handleAddTeachingSkill}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Add Teaching
+                </button>
+              </div>
+
+              {/* Skills Learning */}
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold mb-4">📘 Skills I'm Learning</h3>
+
+                {skillsLearning.length === 0 && (
+                  <p className="text-gray-500">No learning skills added yet.</p>
+                )}
+
+                <div className="space-y-4">
+                  {skillsLearning.map((item, index) => (
+                    <div key={index} className="border p-4 rounded-lg">
+                      <div className="flex justify-between mb-2">
+                        <p className="font-semibold">{item.skill.name}</p>
+                        <button
+                          onClick={() => handleDeleteLearning(item.skill._id)}
+
+                          className="text-red-600 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full bg-gray-200 h-3 rounded-full">
+                        <div
+                          className="bg-blue-600 h-3 rounded-full"
+                          style={{ width: `${item.progress}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">
+                        Progress: {item.progress}%
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills Teaching */}
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold mb-4">🎓 Skills I'm Teaching</h3>
+
+                {skillsTeaching.length === 0 && (
+                  <p className="text-gray-500">No teaching skills added yet.</p>
+                )}
+
+                <div className="space-y-4">
+                  {skillsTeaching.map((item, index) => (
+                    <div key={index} className="border p-4 rounded-lg flex justify-between items-center">
+                      <div>
+                        <p className="font-semibold">{item.skill.name}</p>
+                        <p className={`text-xs mt-1 ${item.approved ? "text-green-600" : "text-yellow-600"}`}>
+                          {item.approved ? "Approved to teach" : "Waiting for approval"}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteTeaching(item.skill._id)}
+
+                        className="text-red-600 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
+
+          {activeTab === "sessions" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">My Sessions</h3>
+                <button
+                  onClick={() => setShowSessionModal(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  + Add Session
+                </button>
+              </div>
+
+              <table className="w-full text-sm border">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-3 border">Skill</th>
+                    <th className="p-3 border">Teacher</th>
+                    <th className="p-3 border">Date</th>
+                    <th className="p-3 border">Duration</th>
+                    <th className="p-3 border">Status</th>
+                    <th className="p-3 border">Meeting</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map(s => (
+                    <tr key={s._id} className="text-center border">
+                      <td className="p-2 border">{s.skill.name}</td>
+                      <td className="p-2 border">{s.teacher.name}</td>
+                      <td className="p-2 border">
+                        {new Date(s.scheduledAt).toLocaleString()}
+                      </td>
+                      <td className="p-2 border">{s.duration} mins</td>
+                      <td className="p-2 border">{s.status}</td>
+                      <td className="p-2 border">
+                        {s.meetingLink ? (
+                          <a
+                            href={s.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            Join
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
         </div>
       </main>
+      {showSessionModal && (
+        <AddSessionModal
+          userId={userId}
+          token={token}
+          onClose={() => setShowSessionModal(false)}
+          onSuccess={() => window.location.reload()}
+        />
+      )}
+
       {showTeacherModal && (
         <TeacherApplicationModal
           user={storedUser}

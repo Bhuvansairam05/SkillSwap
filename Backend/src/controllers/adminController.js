@@ -418,39 +418,45 @@ const approveTeacher = async (req, res) => {
       return res.status(404).json({ message: "Notification not found" });
     }
 
-    // ✅ Direct DB update (no mongoose doc issues)
-    await User.findByIdAndUpdate(
-      notif.refId,
-      {
-        $set: { isTeacher: true },
-        $addToSet: {
-          skillsTeaching: {
-            $each: (notif.skills || []).map(skillId => ({
-              skill: skillId,
-              approved: true
-            }))
-          }
-        }
-      }
-    );
-    
-const checkUser = await User.findById(notif.refId);
-console.log("AFTER UPDATE:", checkUser.isTeacher);
-    await Notification.create({
-      type: "TEACHER_APPROVED",
-      message: "Congratulations! You are now approved as a teacher.",
-      refId: notif.refId
+    const userId = notif.refId;
+    const skillIds = notif.skills || [];
+
+    // 1️⃣ Make user a teacher
+    await User.findByIdAndUpdate(userId, {
+      $set: { isTeacher: true }
     });
 
+    // 2️⃣ Approve the skills already added by user
+    for (const skillId of skillIds) {
+      await User.updateOne(
+        {
+          _id: userId,
+          "skillsTeaching.skill": skillId
+        },
+        {
+          $set: { "skillsTeaching.$.approved": true }
+        }
+      );
+    }
+
+    // 3️⃣ Notify user
+    await Notification.create({
+      type: "TEACHER_APPROVED",
+      message: "Congratulations! Your teaching skill has been approved.",
+      refId: userId
+    });
+
+    // 4️⃣ Delete admin notification
     await Notification.findByIdAndDelete(id);
 
-    res.json({ message: "Teacher Approved and user notified" });
+    res.json({ message: "Teacher skill approved successfully" });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error approving teacher" });
   }
 };
+
 
 
 const rejectTeacher = async (req, res) => {
