@@ -55,6 +55,47 @@ const cancelSession = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+// const createSession = async (req, res) => {
+//   try {
+//     const {
+//       skillId,
+//       teacherId,
+//       learnerId,
+//       scheduledAt,
+//       duration,
+//       creditsUsed
+//     } = req.body;
+
+//     const session = await Session.create({
+//       skill: skillId,
+//       teacher: teacherId,
+//       learner: learnerId,
+//       scheduledAt,
+//       duration,
+//       creditsUsed
+//     });
+
+//     // deduct learner credits
+//     await User.findByIdAndUpdate(learnerId, {
+//       $inc: { credits: -creditsUsed }
+//     });
+
+//     res.status(201).json({
+//       message: "Session booked successfully",
+//       session
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+const getTeacherSessions = async (req, res) => {
+  const sessions = await Session.find({ teacher: req.params.teacherId })
+    .populate("skill", "name")
+    .populate("learner", "name")
+    .sort({ scheduledAt: -1 });
+
+  res.json({ sessions });
+};
 const createSession = async (req, res) => {
   try {
     const {
@@ -66,6 +107,21 @@ const createSession = async (req, res) => {
       creditsUsed
     } = req.body;
 
+    // 1️⃣ Fetch learner
+    const learner = await User.findById(learnerId);
+
+    if (!learner) {
+      return res.status(404).json({ message: "Learner not found" });
+    }
+
+    // 2️⃣ Check credits (minimum 5)
+    if (learner.credits < 5) {
+      return res.status(400).json({
+        message: "No credits to book session dude"
+      });
+    }
+
+    // 3️⃣ Create session
     const session = await Session.create({
       skill: skillId,
       teacher: teacherId,
@@ -75,7 +131,7 @@ const createSession = async (req, res) => {
       creditsUsed
     });
 
-    // deduct learner credits
+    // 4️⃣ Deduct credits
     await User.findByIdAndUpdate(learnerId, {
       $inc: { credits: -creditsUsed }
     });
@@ -88,14 +144,7 @@ const createSession = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-const getTeacherSessions = async (req, res) => {
-  const sessions = await Session.find({ teacher: req.params.teacherId })
-    .populate("skill", "name")
-    .populate("learner", "name")
-    .sort({ scheduledAt: -1 });
 
-  res.json({ sessions });
-};
 const approveSessionByTeacher = async (req, res) => {
   try {
     const { sessionId } = req.params;
