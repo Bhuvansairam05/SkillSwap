@@ -3,6 +3,8 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
+
 export default function LoginModal({ onClose, openSignup }) {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -124,6 +126,51 @@ export default function LoginModal({ onClose, openSignup }) {
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
+          <div className="mt-4 flex justify-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                try {
+                  const res = await fetch(
+                    "http://localhost:5000/api/auth/google-login",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        token: credentialResponse.credential,
+                      }),
+                    }
+                  );
+
+                  const data = await res.json();
+
+                  if (!res.ok) {
+                    if (res.status === 404) {
+                      toast.error("Account not found. Please sign up first.");
+                    } else {
+                      toast.error(data.message || "Google login failed");
+                    }
+                    return;
+                  }
+
+
+                  localStorage.setItem("token", data.token);
+                  localStorage.setItem("user", JSON.stringify(data.user));
+
+                  toast.success("Login successful");
+                  onClose();
+
+                  if (data.user.role === "admin") {
+                    navigate("/admin", { state: { user: data.user } });
+                  } else {
+                    navigate("/user", { state: { user: data.user } });
+                  }
+                } catch (err) {
+                  toast.error("Google login failed");
+                }
+              }}
+              onError={() => toast.error("Google Sign-In failed")}
+            />
+          </div>
 
           <div className="flex justify-between items-center mt-4">
             <button
