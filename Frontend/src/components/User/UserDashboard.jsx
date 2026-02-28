@@ -19,7 +19,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import TeacherApplicationModal from "./TeacherApplicationModal";
 import AddSessionModal from "./AddSessionModal";
-
+import Notification from "./Notification";
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -397,7 +397,7 @@ function UserDashboard() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Bell className="w-6 h-6 text-gray-600" />
+            <Notification token={token} userId={userId} />
             <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-semibold">

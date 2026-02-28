@@ -210,7 +210,20 @@ const getTeachersBySkill = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+const getUserNotifications = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    const notifications = await Notification.find({
+      refId: userId
+    }).sort({ createdAt: -1 });
+
+    res.json({ notifications });
+
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch notifications" });
+  }
+};
 
 module.exports = { dashboardData,getMe,getUserSkills,
   getAllSkills,
@@ -218,4 +231,4 @@ module.exports = { dashboardData,getMe,getUserSkills,
   deleteLearningSkill,
   addTeachingSkill,
   deleteTeachingSkill,
-  updateLearningProgress, getBookableSkills, getTeachersBySkill};
+  updateLearningProgress, getBookableSkills, getTeachersBySkill,getUserNotifications};

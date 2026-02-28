@@ -6,7 +6,7 @@ const {dashboardData,getMe, getUserSkills,
   deleteLearningSkill,
   addTeachingSkill,
   deleteTeachingSkill,
-  updateLearningProgress,getBookableSkills,getTeachersBySkill} = require("../controllers/userController");
+  updateLearningProgress,getBookableSkills,getTeachersBySkill,getUserNotifications} = require("../controllers/userController");
 const {
   getUserSessions,completeSession,cancelSession,createSession, getTeacherSessions,
   approveSessionByTeacher,
@@ -36,5 +36,5 @@ router.get("/teacher/sessions/:teacherId", getTeacherSessions);
 router.put("/teacher/sessions/approve/:sessionId", approveSessionByTeacher);
 router.get("/booking/skills", getBookableSkills);
 router.get("/booking/teachers/:skillId", getTeachersBySkill);
-
+router.get("/notifications/:userId", getUserNotifications);
 module.exports = router;
