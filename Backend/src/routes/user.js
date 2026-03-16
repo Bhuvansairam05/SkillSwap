@@ -6,7 +6,7 @@ const {dashboardData,getMe, getUserSkills,
   deleteLearningSkill,
   addTeachingSkill,
   deleteTeachingSkill,
-  updateLearningProgress,getBookableSkills,getTeachersBySkill,getUserNotifications} = require("../controllers/userController");
+  updateLearningProgress,getBookableSkills,getTeachersBySkill,getUserNotifications,deleteNotification,clearNotifications,readNotification} = require("../controllers/userController");
 const {
   getUserSessions,completeSession,cancelSession,createSession, getTeacherSessions,
   approveSessionByTeacher,
@@ -37,4 +37,7 @@ router.put("/teacher/sessions/approve/:sessionId", approveSessionByTeacher);
 router.get("/booking/skills", getBookableSkills);
 router.get("/booking/teachers/:skillId", getTeachersBySkill);
 router.get("/notifications/:userId", getUserNotifications);
+router.patch("/notifications/:id/read",readNotification)
+router.delete("/notifications/:id",deleteNotification);
+router.delete("/notifications/clear/:userId",clearNotifications);
 module.exports = router;

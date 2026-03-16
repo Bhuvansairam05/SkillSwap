@@ -34,6 +34,7 @@ export default function LoginModal({ onClose, openSignup }) {
       });
       const data = await res.json();
       if (!res.ok) {
+        console.log("login failed ra babu",data);
         toast.error(data.message || "Login failed");
         setLoading(false);
         return;

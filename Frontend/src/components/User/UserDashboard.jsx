@@ -355,7 +355,7 @@ function UserDashboard() {
 
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r transition-all hidden md:flex md:flex-col`}>
-        <div className="h-16 sm:h-20 lg:h-24 px-4 border-b flex items-center justify-between">
+        <div className={`h-16 sm:h-20 lg:h-24 px-4 border-b flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -364,7 +364,7 @@ function UserDashboard() {
               <span className="font-bold text-gray-900">Peer Skill</span>
             </div>
           )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <button  onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X /> : <Menu />}
           </button>
         </div>

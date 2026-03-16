@@ -35,7 +35,7 @@ function Notification({ token, onOpenTeachers }) {
     const markAsRead = async (id) => {
         try {
             await fetch(
-                `http://localhost:5000/api/admin/notifications/${id}/read`,
+                `http://localhost:5000/api/user/notifications/${id}/read`,
                 {
                     method: "PATCH",
                     headers: {
@@ -97,6 +97,7 @@ function Notification({ token, onOpenTeachers }) {
                         {notifications.map(n => (
                             <div
                                 key={n._id}
+                                onClick={() => !n.isRead && markAsRead(n._id)}
                                 className={`px-4 py-3 text-sm border-b ${!n.isRead ? "bg-blue-50" : ""}`}
                             >
                                 <p className="text-gray-800 font-semibold">{n.message}</p>

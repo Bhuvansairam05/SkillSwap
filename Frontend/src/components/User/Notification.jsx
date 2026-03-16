@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell, X, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 function Notification({ token, userId }) {
@@ -37,7 +37,7 @@ function Notification({ token, userId }) {
     const markAsRead = async (id) => {
         try {
             await fetch(
-                `http://localhost:5000/api/admin/notifications/${id}/read`,
+                `http://localhost:5000/api/user/notifications/${id}/read`,
                 {
                     method: "PATCH",
                     headers: {
@@ -55,7 +55,42 @@ function Notification({ token, userId }) {
             toast.error("Failed to update notification");
         }
     };
+    const deleteNotification = async (id) => {
+        try {
+            await fetch(`http://localhost:5000/api/user/notifications/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
+            setNotifications(prev =>
+                prev.filter(n => n._id !== id)
+            );
+
+            toast.success("Notification removed");
+
+        } catch {
+            toast.error("Failed to remove notification");
+        }
+    };
+    const clearAllNotifications = async () => {
+        try {
+            await fetch(`http://localhost:5000/api/user/notifications/clear/${userId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setNotifications([]);
+
+            toast.success("All notifications cleared");
+
+        } catch {
+            toast.error("Failed to clear notifications");
+        }
+    };
     return (
         <div className="relative">
             {/* Bell */}
@@ -99,106 +134,42 @@ function Notification({ token, userId }) {
                         {notifications.map(n => (
                             <div
                                 key={n._id}
-                                className={`px-4 py-3 text-sm border-b ${!n.isRead ? "bg-blue-50" : ""}`}
+                                onClick={() => !n.isRead && markAsRead(n._id)}
+                                className={`px-4 py-3 text-sm border-b flex justify-between items-start cursor-pointer ${!n.isRead ? "bg-blue-50" : ""}`}
                             >
-                                <p className="text-gray-800 font-semibold">{n.message}</p>
 
-                                {/* Skills */}
-                                {n.skills && (
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        Skills: {n.skills.join(", ")}
+                                <div>
+                                    <p className="text-gray-800 font-semibold">{n.message}</p>
+
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {new Date(n.createdAt).toLocaleString()}
                                     </p>
-                                )}
+                                </div>
 
-                                {/* Zoom link input if not added */}
-                                {!n.zoomlink && !n.approve && !n.reject && (
-                                    <div className="mt-2 flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Paste Zoom link"
-                                            className="border px-2 py-1 rounded w-full text-xs"
-                                            onKeyDown={async (e) => {
-                                                if (e.key == "Enter") {
-                                                    const link = e.target.value;
-                                                    if (!link) return;
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();   // prevents triggering markAsRead
+                                        deleteNotification(n._id);
+                                    }}
+                                    className="text-gray-400 hover:text-red-500"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
 
-                                                    await fetch(
-                                                        `http://localhost:5000/api/admin/notifications/${n._id}/zoom`,
-                                                        {
-                                                            method: "PATCH",
-                                                            headers: {
-                                                                "Content-Type": "application/json",
-                                                                Authorization: `Bearer ${token}`
-                                                            },
-                                                            body: JSON.stringify({ zoomlink: link })
-                                                        }
-                                                    );
-
-                                                    toast.success("Zoom link sent to user");
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                )}
-
-                                {/* After zoom added → show Approve Reject */}
-                                {n.zoomlink && !n.approve && !n.reject && (
-                                    <div className="flex gap-2 mt-3">
-                                        <button
-                                            onClick={async () => {
-                                                await fetch(
-                                                    `http://localhost:5000/api/admin/notifications/${n._id}/approve`,
-                                                    {
-                                                        method: "PATCH",
-                                                        headers: { Authorization: `Bearer ${token}` }
-                                                    }
-                                                );
-                                                toast.success("Teacher Approved");
-                                                window.location.reload();
-                                            }}
-                                            className="bg-green-600 text-white px-3 py-1 rounded text-xs"
-                                        >
-                                            Approve
-                                        </button>
-
-                                        <button
-                                            onClick={async () => {
-                                                await fetch(
-                                                    `http://localhost:5000/api/admin/notifications/${n._id}/reject`,
-                                                    {
-                                                        method: "PATCH",
-                                                        headers: { Authorization: `Bearer ${token}` }
-                                                    }
-                                                );
-                                                toast.error("Teacher Rejected");
-                                                window.location.reload();
-                                            }}
-                                            className="bg-red-600 text-white px-3 py-1 rounded text-xs"
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                )}
-
-                                {/* Status */}
-                                {n.approve && (
-                                    <p className="text-green-600 text-xs mt-2 font-semibold">
-                                        Approved ✅
-                                    </p>
-                                )}
-
-                                {n.reject && (
-                                    <p className="text-red-600 text-xs mt-2 font-semibold">
-                                        Rejected ❌
-                                    </p>
-                                )}
-
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {new Date(n.createdAt).toLocaleString()}
-                                </p>
                             </div>
 
                         ))}
+                        {notifications.length > 0 && (
+                            <div className="flex justify-end p-3 border-t">
+                                <button
+                                    onClick={clearAllNotifications}
+                                    className="text-xs text-red-600 hover:underline"
+                                >
+                                    Clear All
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             )}

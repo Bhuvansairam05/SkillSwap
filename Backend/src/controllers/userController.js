@@ -34,7 +34,7 @@ const dashboardData = async (req, res) => {
     const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
 
     // 4️⃣ Send dashboard response
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         credits: user.credits,
@@ -46,15 +46,23 @@ const dashboardData = async (req, res) => {
 
   } catch (error) {
     console.error("User dashboard error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to load dashboard data"
     });
   }
 };
 const getMe = async (req, res) => {
-  const user = await User.findById(req.params.userId).select("-password");
-  res.json({ user });
+  try {
+    const user = await User.findById(req.params.userId).select("-password");
+    return res.json({ user });
+  }
+  catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed due to server error"
+    });
+  }
 };
 const getUserSkills = async (req, res) => {
   try {
@@ -63,17 +71,17 @@ const getUserSkills = async (req, res) => {
       .populate("skillsTeaching.skill")
       .select("skillsLearning skillsTeaching");
 
-    res.json({ user });
+    return res.json({ user });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const getAllSkills = async (req, res) => {
   try {
     const skills = await Skill.find().select("name category");
-    res.json({ skills });
+    return res.json({ skills });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const addLearningSkill = async (req, res) => {
@@ -93,9 +101,9 @@ const addLearningSkill = async (req, res) => {
     user.skillsLearning.push({ skill: skillId, progress: 0 });
     await user.save();
 
-    res.json({ message: "Learning skill added" });
+    return res.json({ message: "Learning skill added" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const deleteLearningSkill = async (req, res) => {
@@ -106,9 +114,9 @@ const deleteLearningSkill = async (req, res) => {
       $pull: { skillsLearning: { skill: skillId } }
     });
 
-    res.json({ message: "Learning skill removed" });
+    return res.json({ message: "Learning skill removed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const addTeachingSkill = async (req, res) => {
@@ -138,9 +146,9 @@ const addTeachingSkill = async (req, res) => {
       refId: userId
     });
 
-    res.json({ message: "Teaching skill sent for admin approval" });
+    return res.json({ message: "Teaching skill sent for admin approval" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const deleteTeachingSkill = async (req, res) => {
@@ -151,9 +159,9 @@ const deleteTeachingSkill = async (req, res) => {
       $pull: { skillsTeaching: { skill: skillId } }
     });
 
-    res.json({ message: "Teaching skill removed" });
+    return res.json({ message: "Teaching skill removed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const updateLearningProgress = async (req, res) => {
@@ -166,9 +174,9 @@ const updateLearningProgress = async (req, res) => {
       { $set: { "skillsLearning.$.progress": progress } }
     );
 
-    res.json({ message: "Progress updated" });
+    return res.json({ message: "Progress updated" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 // Skills which have at least 1 approved teacher
@@ -188,9 +196,9 @@ const getBookableSkills = async (req, res) => {
       });
     });
 
-    res.json({ skills: Array.from(skillMap.values()) });
+    return res.json({ skills: Array.from(skillMap.values()) });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 // Teachers for selected skill
@@ -205,9 +213,9 @@ const getTeachersBySkill = async (req, res) => {
       }
     }).select("name");
 
-    res.json({ teachers });
+    return res.json({ teachers });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const getUserNotifications = async (req, res) => {
@@ -215,20 +223,82 @@ const getUserNotifications = async (req, res) => {
     const { userId } = req.params;
 
     const notifications = await Notification.find({
-      refId: userId
+      refId: userId,
+      type: { $ne: "NEW_TEACHER" }
     }).sort({ createdAt: -1 });
 
-    res.json({ notifications });
+    return res.json({ notifications });
 
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch notifications" });
+    return res.status(500).json({ message: "Failed to fetch notifications" });
   }
 };
+const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { dashboardData,getMe,getUserSkills,
+    const notification = await Notification.findByIdAndDelete(id);
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    return res.json({
+      message: "Notification deleted successfully"
+    });
+  }
+  catch (error) {
+    return res.status(500).json({ message: "Failed to delete Notifications" });
+  }
+}
+const clearNotifications = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    await Notification.deleteMany({
+      refId: userId
+    });
+
+    return res.json({
+      message: "All notifications cleared successfully"
+    });
+  }
+  catch (error) {
+    return res.status(500).json({ message: "Failed to clear notificaions" });
+  }
+}
+const readNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { isRead: true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    return res.json({
+      message: "Notification marked as read",
+      notification
+    });
+
+  }
+  catch (error) {
+    return res.status(500).json({ message: "Failed to read notifications" });
+  }
+}
+module.exports = {
+  dashboardData, getMe, getUserSkills,
   getAllSkills,
   addLearningSkill,
   deleteLearningSkill,
   addTeachingSkill,
   deleteTeachingSkill,
-  updateLearningProgress, getBookableSkills, getTeachersBySkill,getUserNotifications};
+  updateLearningProgress, getBookableSkills, getTeachersBySkill, getUserNotifications,
+  deleteNotification, clearNotifications,
+  readNotification
+};
