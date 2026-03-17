@@ -390,7 +390,7 @@ function UserDashboard() {
 
       {/* Main */}
       <main className="flex-1 overflow-auto">
-        <header className="bg-white border-b h-24 px-6 flex justify-between items-center">
+        <header className="sticky top-0 z-50 bg-white border-b h-24 px-6 flex justify-between items-center">
           <div>
             <h1 className="text-xl lg:text-2xl font-bold">Welcome back, {user.name}</h1>
             <p className="text-sm text-gray-600">Learner Dashboard</p>

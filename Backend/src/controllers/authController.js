@@ -12,7 +12,7 @@ const signup = async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success:false,message: "User already exists" });
+      return  res.status(400).json({ success:false,message: "User already exists" });
     }
 
     // Hash password
@@ -27,7 +27,7 @@ const signup = async (req, res) => {
       credits
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Signup successful",
       user: {
         id: user._id,
@@ -38,7 +38,7 @@ const signup = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Signup failed" });
+    return res.status(500).json({ message: "Signup failed" });
   }
 };
 
@@ -52,13 +52,13 @@ const login = async (req, res) => {
     // Check user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found!!" });
+      return  res.status(404).json({ message: "User not found!!" });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect password!!" });
+      return  res.status(400).json({ message: "Incorrect password!!" });
     }
 
     // Generate token
@@ -68,7 +68,7 @@ const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       token,
       user: {
@@ -83,7 +83,7 @@ const login = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Login failed" });
+    return res.status(500).json({ message: "Login failed" });
   }
 };
 const { OAuth2Client } = require("google-auth-library");
@@ -106,7 +106,7 @@ const googleLogin = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-  return res.status(404).json({
+  return  res.status(404).json({
     success: false,
     message: "Please sign up first using this email.",
   });
@@ -120,7 +120,7 @@ const googleLogin = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({
+    return res.json({
       success: true,
       token: jwtToken,
       user: {
@@ -134,7 +134,7 @@ const googleLogin = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: "Google login failed" });
+    return res.status(401).json({ success: false, message: "Google login failed" });
   }
 };
 

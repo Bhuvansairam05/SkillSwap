@@ -139,7 +139,7 @@ function Admin() {
 
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r transition-all`}>
-        <div className="h-24 px-4 border-b flex items-center justify-between">
+        <div className={`h-24 px-4 border-b flex items-center  ${sidebarOpen? "justify-between":"justify-center"}`}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
               {/* Thunder Logo */}
@@ -185,7 +185,7 @@ function Admin() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {/* Header */}
-        <header className="bg-white border-b h-24 px-8 flex justify-between items-center">
+        <header className="sticky top-0 z-50 bg-white border-b h-24 px-8 flex justify-between items-center">
 
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>

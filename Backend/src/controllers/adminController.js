@@ -17,14 +17,14 @@ const getAllUsers = async (req, res) => {
     ).sort({ createdAt: -1 });
 
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: users.length,
       users
     });
   } catch (error) {
     console.error("Admin get users error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch users"
     });
@@ -181,12 +181,12 @@ const getAllSessions = async (req, res) => {
       .populate("learner", "name email")
       .sort({ scheduledAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       sessions
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch sessions"
     });
@@ -206,12 +206,12 @@ const getSessionById = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       session
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch session"
     });
@@ -240,12 +240,12 @@ const cancelSession = async (req, res) => {
 
     // 🔔 Future: refund credits / notify users
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Session cancelled successfully"
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to cancel session"
     });
@@ -272,12 +272,12 @@ const completeSession = async (req, res) => {
     session.status = "completed";
     await session.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Session marked as completed"
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to complete session"
     });
@@ -287,13 +287,13 @@ const getSkills = async (req, res) => {
   try {
     const skills = await Skill.find().sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       skills
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch skills"
     });
@@ -314,13 +314,13 @@ const deleteSkill = async (req, res) => {
 
     await Skill.findByIdAndDelete(skillId);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Skill deleted successfully"
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to delete skill"
     });
@@ -349,14 +349,14 @@ const addSkill = async (req, res) => {
       category: category.trim(),
       description: description?.trim() || ""
     });
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Skill added successfully",
       skill
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to add skill"
     });
@@ -399,13 +399,13 @@ const addNotification = async (req, res) => {
       refId: userId
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Notification sent to admin",
       data: newNotification,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -449,15 +449,13 @@ const approveTeacher = async (req, res) => {
     // 4️⃣ Delete admin notification
     await Notification.findByIdAndDelete(id);
 
-    res.json({ message: "Teacher skill approved successfully" });
+    return res.json({ message: "Teacher skill approved successfully" });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error approving teacher" });
+    return res.status(500).json({ message: "Error approving teacher" });
   }
 };
-
-
 
 const rejectTeacher = async (req, res) => {
   try {
@@ -476,10 +474,10 @@ const rejectTeacher = async (req, res) => {
     // ❌ Remove admin notification
     await Notification.findByIdAndDelete(id);
 
-    res.json({ message: "Teacher Rejected and user notified" });
+    return res.json({ message: "Teacher Rejected and user notified" });
 
   } catch (err) {
-    res.status(500).json({ message: "Error rejecting teacher" });
+    return res.status(500).json({ message: "Error rejecting teacher" });
   }
 };
 
@@ -506,10 +504,10 @@ const sendZoomLink = async (req, res) => {
       `Hi ${user.name},\n\nYour teacher interview is scheduled.\nZoom Link: ${zoomlink}`
     );
 
-    res.json({ message: "Zoom link sent to user email" });
+    return res.json({ message: "Zoom link sent to user email" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error sending zoom link" });
+    return res.status(500).json({ message: "Error sending zoom link" });
   }
 };
 

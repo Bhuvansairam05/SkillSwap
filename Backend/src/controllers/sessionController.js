@@ -12,9 +12,9 @@ const getUserSessions = async (req, res) => {
       .populate("learner", "name")
       .sort({ scheduledAt: -1 });
 
-    res.json({ sessions });
+    return res.json({ sessions });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const completeSession = async (req, res) => {
@@ -37,9 +37,9 @@ const completeSession = async (req, res) => {
       }
     );
 
-    res.json({ message: "Session marked as completed" });
+    return res.json({ message: "Session marked as completed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 const cancelSession = async (req, res) => {
@@ -50,9 +50,9 @@ const cancelSession = async (req, res) => {
       status: "cancelled"
     });
 
-    res.json({ message: "Session cancelled" });
+    return res.json({ message: "Session cancelled" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 // const createSession = async (req, res) => {
@@ -80,12 +80,12 @@ const cancelSession = async (req, res) => {
 //       $inc: { credits: -creditsUsed }
 //     });
 
-//     res.status(201).json({
+//     return res.status(201).json({
 //       message: "Session booked successfully",
 //       session
 //     });
 //   } catch (err) {
-//     res.status(500).json({ message: err.message });
+//     return res.status(500).json({ message: err.message });
 //   }
 // };
 const getTeacherSessions = async (req, res) => {
@@ -94,7 +94,7 @@ const getTeacherSessions = async (req, res) => {
     .populate("learner", "name")
     .sort({ scheduledAt: -1 });
 
-  res.json({ sessions });
+  return res.json({ sessions });
 };
 const createSession = async (req, res) => {
   try {
@@ -111,12 +111,12 @@ const createSession = async (req, res) => {
     const learner = await User.findById(learnerId);
 
     if (!learner) {
-      return res.status(404).json({ message: "Learner not found" });
+      return  res.status(404).json({ message: "Learner not found" });
     }
 
     // 2️⃣ Check credits (minimum 5)
     if (learner.credits < 5) {
-      return res.status(400).json({
+      return  res.status(400).json({
         message: "No credits to book session dude"
       });
     }
@@ -136,12 +136,12 @@ const createSession = async (req, res) => {
       $inc: { credits: -creditsUsed }
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Session booked successfully",
       session
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -155,9 +155,9 @@ const approveSessionByTeacher = async (req, res) => {
       status: "scheduled" // now it becomes active
     });
     console.log('successful')
-    res.json({ message: "Session approved and meeting link added" });
+    return res.json({ message: "Session approved and meeting link added" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
