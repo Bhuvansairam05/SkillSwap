@@ -56,12 +56,12 @@ function UserDashboard() {
     rating: 0
   });
   useEffect(() => {
-  if (user.isTeacher) {
-    fetch(`http://localhost:5000/api/user/teacher/sessions/${userId}`)
-      .then(res => res.json())
-      .then(data => setTeacherSessions(data.sessions));
-  }
-}, [activeTab, user.isTeacher]);
+    if (user.isTeacher) {
+      fetch(`http://localhost:5000/api/user/teacher/sessions/${userId}`)
+        .then(res => res.json())
+        .then(data => setTeacherSessions(data.sessions));
+    }
+  }, [activeTab, user.isTeacher]);
 
   useEffect(() => {
     const fetchAllSkills = async () => {
@@ -364,7 +364,7 @@ function UserDashboard() {
               <span className="font-bold text-gray-900">Peer Skill</span>
             </div>
           )}
-          <button  onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X /> : <Menu />}
           </button>
         </div>
@@ -390,10 +390,10 @@ function UserDashboard() {
 
       {/* Main */}
       <main className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-50 bg-white border-b h-24 px-6 flex justify-between items-center">
+        <header className=" bg-white border-b h-24 px-6 flex justify-between items-center">
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold">Welcome back, {user.name}</h1>
-            <p className="text-sm text-gray-600">Learner Dashboard</p>
+            <h1 className="text-xl lg:text-2xl font-bold">Welcome  {user.name}</h1>
+            <p className="text-sm text-gray-600">{user.isTeacher ? "Teacher Dashboard" : "Learner Dashboard"}</p>
           </div>
 
           <div className="flex items-center gap-6">
@@ -493,12 +493,16 @@ function UserDashboard() {
                               }
                             />
                             <button
-                              onClick={() => handleApproveSession(session._id,zoomLinks[session._id])}
+                              onClick={() => handleApproveSession(session._id, zoomLinks[session._id])}
                               className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm"
                             >
                               Approve
                             </button>
                           </div>
+                        ) : new Date(session.scheduledAt) < new Date() ? (
+                          <p className="text-red-600 font-semibold text-sm">
+                            Completed
+                          </p>
                         ) : (
                           <a
                             href={session.meetingLink}
@@ -626,7 +630,7 @@ function UserDashboard() {
                   onClick={() => setShowSessionModal(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
                 >
-                  + Add Session
+                  + Book Session
                 </button>
               </div>
 
