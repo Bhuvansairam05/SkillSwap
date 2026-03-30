@@ -21,6 +21,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import FreeVideos from "./FreeVideos";
 
 function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -164,7 +165,8 @@ function Admin() {
             { id: "users", icon: Users, label: "Users" },
             { id: "teachers", icon: UserCheck, label: "Teachers" },
             { id: "sessions", icon: Video, label: "Sessions" },
-            { id: "skills", icon: Award, label: "Skills" }
+            { id: "skills", icon: Award, label: "Skills" },
+            {id:"free videos", icon:Video,label:"Free Videos"}
           ].map(item => (
             <button
               key={item.id}
@@ -272,6 +274,9 @@ function Admin() {
           )}
           {activeTab === "skills" && (
             <Skills />
+          )}
+          {activeTab==="free videos"&&(
+            <FreeVideos/>
           )}
         </div>
 

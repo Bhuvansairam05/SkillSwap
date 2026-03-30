@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import TeacherApplicationModal from "./TeacherApplicationModal";
 import AddSessionModal from "./AddSessionModal";
 import Notification from "./Notification";
-
+import FreeResources from "./FreeResources";
 function UserDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -140,6 +140,29 @@ function UserDashboard() {
       )
     );
   };
+  const handleCancelSession = async (id) => {
+    
+  try {
+    await fetch(
+      `http://localhost:5000/api/user/sessions/cancel/${id}`,
+      {
+        method: "PUT"
+      }
+    );
+
+    toast.success("Session cancelled");
+
+    // update UI (same like approve)
+    setTeacherSessions(prev =>
+      prev.map(s =>
+        s._id === id ? { ...s, status: "cancelled" } : s
+      )
+    );
+
+  } catch (error) {
+    toast.error("Error cancelling session");
+  }
+};
 
   const handleComplete = async (id) => {
     await fetch(`http://localhost:5000/api/user/sessions/complete/${id}`, {
@@ -373,7 +396,8 @@ function UserDashboard() {
           {[
             { id: "overview", icon: TrendingUp, label: "Dashboard" },
             { id: "Skills", icon: BookOpen, label: "My Skills" },
-            { id: "sessions", icon: Video, label: "Sessions" }
+            { id: "sessions", icon: Video, label: "Sessions" },
+            { id: "videos", icon: Video, label: "Free Resources" },
           ].map(item => (
             <button
               key={item.id}
@@ -478,7 +502,7 @@ function UserDashboard() {
                         </div>
 
                         {/* If link not added yet */}
-                        {!session.meetingLink ? (
+                        {!session.meetingLink && session.status==="scheduled" ? (
                           <div className="flex gap-2">
                             <input
                               type="text"
@@ -498,12 +522,23 @@ function UserDashboard() {
                             >
                               Approve
                             </button>
+                            <button
+                              onClick={() => handleCancelSession(session._id, zoomLinks[session._id])}
+                              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+                            >
+                              Cancel
+                            </button>
                           </div>
                         ) : new Date(session.scheduledAt) < new Date() ? (
                           <p className="text-red-600 font-semibold text-sm">
                             Completed
                           </p>
+                        ) : session.status!=="scheduled" ? (
+                          <p className="text-red-600 font-semibold text-sm">
+                            {session.status}
+                          </p>
                         ) : (
+                          <>
                           <a
                             href={session.meetingLink}
                             target="_blank"
@@ -512,6 +547,13 @@ function UserDashboard() {
                           >
                             Join Meeting
                           </a>
+                          <button
+                              onClick={() => handleCancelSession(session._id, zoomLinks[session._id])}
+                              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </>
                         )}
                       </div>
                     ))}
@@ -675,7 +717,7 @@ function UserDashboard() {
               </table>
             </div>
           )}
-
+          {activeTab === "videos" && <FreeResources />}
         </div>
       </main>
       {showSessionModal && (

@@ -100,6 +100,7 @@ function AddSessionModal({ userId, token, onClose, onSuccess }) {
                     <input
                         type="date"
                         className="w-full border p-2 pl-10 rounded"
+                        min={new Date().toISOString().split("T")[0]}  
                         onChange={e => setForm({ ...form, date: e.target.value })}
                     />
                 </div>
